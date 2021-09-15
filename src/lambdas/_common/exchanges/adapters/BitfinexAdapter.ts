@@ -13,6 +13,7 @@ let cache = {};
 export default class BitfinexAdapter implements ExchangeAdapter {
 	bfx: RESTv2
 	constructor( exchangeAccount: DbExchangeAccount ){
+		console.log('Createing bfx', exchangeAccount);
 		this.bfx = new RESTv2({
 			apiKey: exchangeAccount.key,
 			apiSecret: exchangeAccount.secret
@@ -58,7 +59,7 @@ export default class BitfinexAdapter implements ExchangeAdapter {
 		let toSubmit = orders.map( order => {
 			let bfxOptions: any = {
 				type: getBfxOrderType(order.type),
-				pair: toExchangePair(order.pair),
+				symbol: toExchangePair(order.pair),
 				amount: order.direction === 'buy' ? order.amount : -order.amount
 			};
 
@@ -170,7 +171,7 @@ function convertToExchangeOrder(rawOrder): ExchangeOrder {
 
 	let exchangeOrder: ExchangeOrder =  {
 		id: bfxOrder.id,
-		pair: getOrderPair(bfxOrder.pair),
+		pair: getOrderPair(bfxOrder.symbol),
 		type: bfxOrder.type.includes('LIMIT') ? 'limit' : 'market',
 		status,
 		errorReason: null,

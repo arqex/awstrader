@@ -241,6 +241,7 @@ export interface ConsoleEntry {
 export interface BaseExchange {
 	name: string
 	provider: 'bitfinex'
+	createdAt: number
 	type: 'real' | 'virtual'
 	key?: string
 	secret?: string
@@ -249,11 +250,13 @@ export interface BaseExchange {
 export interface DynamoExchange extends BaseExchange, TableItem {}
 export interface ModelExchange extends BaseExchange {
 	id: string
+	accountId: string
 }
 export interface DbExchangeAccount extends TableItem {
 	id: string
 	name: string
 	provider: 'bitfinex'
+	createdAt: number
 	type: 'real' | 'virtual'
 	key?: string
 	secret?: string

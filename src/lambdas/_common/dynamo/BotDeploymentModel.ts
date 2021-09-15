@@ -37,6 +37,7 @@ export default {
 	},
 
 	async getSingleFull(compoundId: string): Promise<FullBotDeployment | void > {
+		console.log('Getting single full', compoundId);
 		let {accountId, resourceId: deploymentId} = parseId(compoundId);
 		let entry = await Db.getSingle(accountId, `${DEPLOYMENT_PREFIX}${deploymentId}`);
 		if( !entry ) return;

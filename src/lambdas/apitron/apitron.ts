@@ -132,7 +132,7 @@ async function setTestData() {
 			provider: 'bitfinex',
 			type: 'real',
 			key: 'Mma7B6ISTUNVcnUPOrDJgVgcNRh3VbmeIalaBDvUpml',
-			secret: 'U2FsdGVkX18urwMNykZfeGeUbn4cGGgWgI7uGl3/qzeexDPcmUQX6cEAr9s5bcKe5wUhIKfwiysejvfD9h5lJw=='
+			secret: 'U2FsdGVkX1824o9FgiOF9BxzhmGCFb8uif4cOgToOk1l0DLUFhT8Ua1pNmgbZU7odyYY4tdoA4s1c3XrM4tyxQ=='
 		});
 
 		await ExchangeAccountModel.create({

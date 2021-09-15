@@ -12,7 +12,6 @@ interface TripleId {
 }
 
 export function createId(): string {
-	console.log('SLIGID', nice);
 	return nice();
 }
 

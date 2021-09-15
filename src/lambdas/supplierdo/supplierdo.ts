@@ -3,6 +3,7 @@ import { SupplierdoRunner } from '../_common/botRunner/SupplierdoRunner';
 
 export async function supplierdo({ accountId, deploymentId }) {
 	try {
+		console.log('Handling run request', accountId, deploymentId);
 		await handleRunRequest( accountId, deploymentId );
 	}
 	catch(err) {
@@ -14,5 +15,5 @@ export async function supplierdo({ accountId, deploymentId }) {
 }
 
 async function handleRunRequest( accountId: string, deploymentId: string ) {
-	return runBotIteration(accountId, deploymentId, SupplierdoRunner);
+	return runBotIteration(accountId, deploymentId + accountId, SupplierdoRunner);
 }

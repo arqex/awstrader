@@ -1,7 +1,7 @@
 import { ContextResult, Mutation, MutationContextInput, MutationGetterInput, MutationHandler, MutationResponseInput, ResponseResult } from "../apitron.types";
 import { validateShape } from "../utils/validators";
-import {v4 as uuid} from 'uuid';
 import { createId } from "../../_common/utils/resourceId";
+import exchanger from "../../_common/exchanges/exchanger";
 
 const createExchangeAccountHandler: MutationHandler = {
 	name: 'createExchangeAccount',
@@ -22,8 +22,15 @@ const createExchangeAccountHandler: MutationHandler = {
 		const {accountId, provider, type, key, secret, name, initialBalances} = input.body;
 		let data = {
 			id: createId(),
+			createdAt: Date.now(),
 			accountId, provider, type, key, secret, name, initialBalances
 		}
+
+		if( type === 'real' ){
+			data.secret = exchanger.getEncodedSecret(input.body);
+			console.log('SECRET', data.secret);
+		}
+
 		return [{
 			model: 'exchangeAccount',
 			action: 'create',

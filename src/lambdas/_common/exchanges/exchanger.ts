@@ -24,13 +24,20 @@ const exchanger = {
 		}
 
 		if( exchangeAccount.type === 'real' ){
+			console.log('Real exchange!', exchangeAccount);
 			exchangeAccount = {
 				...exchangeAccount,
-				secret: AES.decrypt(exchangeAccount.secret, exchangeAccount.accountId).toString(utf8Encode)
+				secret: this.getDecodedSecret(exchangeAccount)
 			}
 		}
 
 		return new Adapter( exchangeAccount );
+	},
+	getDecodedSecret({secret, accountId}: DbExchangeAccount){
+		return AES.decrypt(secret, accountId).toString(utf8Encode);
+	},
+	getEncodedSecret({secret, accountId}: DbExchangeAccount){
+		return AES.encrypt(secret, accountId).toString();
 	}
 }
 

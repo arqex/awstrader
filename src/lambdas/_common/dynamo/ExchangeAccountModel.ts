@@ -134,6 +134,7 @@ function dynamoToModel( dynamoExchange: DynamoExchange ): ModelExchange {
 	const {resourceId, accountId, ...baseAccount} = dynamoExchange;
 	return {
 		id: resourceId.replace('EXCHANGE#', '') + accountId,
+		accountId,
 		...baseAccount
 	}
 }
@@ -142,7 +143,6 @@ function modelToDynamo( modelExchange: ModelExchange ): DynamoExchange {
 	const {id, ...baseBot} = modelExchange;
 	const {resourceId, accountId} = parseId(id);
 	return {
-		accountId,
 		resourceId: `EXCHANGE#${resourceId}`,
 		...baseBot
 	}

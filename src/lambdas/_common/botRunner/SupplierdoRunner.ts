@@ -176,13 +176,30 @@ const SupplierdoRunner: BotRunner = {
 			}
 		});
 
-		return adapter.cancelOrders( exchangeOrderIds ).then( () => {
-			return deploymentOrderIds;
-		});
+		if( deploymentOrderIds.length ){
+			console.log(`Cancelling ${deploymentOrderIds.length} orders`);
+			return adapter.cancelOrders( exchangeOrderIds ).then( () => {
+				return deploymentOrderIds;
+			});
+		}
+		else {
+			console.log('No orders to cancel');
+		}
+
+		return Promise.resolve(deploymentOrderIds);
+
+		
 	},
 
 	placeOrders( adapter: ExchangeAdapter, orders: Order[]): Promise<ExchangeOrder[]>{
-		return adapter.placeOrders(orders);
+		if( orders.length ){
+			console.log(`Placing ${orders.length} orders`);
+			return adapter.placeOrders(orders);
+		}
+		else {
+			console.log( 'No orders to place');
+		}
+		return Promise.resolve([]);
 	}
 }
 
