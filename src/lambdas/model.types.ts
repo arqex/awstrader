@@ -305,3 +305,43 @@ export interface ExchangeAccountResponse {
 	type: string
 	key: string
 }
+
+// BACKTEST	
+export interface BacktestConfig {
+	baseAssets: string[],
+	quotedAsset: string,
+	runInterval: RunInterval,
+	initialBalances: {[asset: string]: number}
+	startDate: number
+	endDate: number
+	fees: number,
+	slippage: number,
+	extraConfig?: {[key: string]: any}
+}
+
+export interface QuickBacktestResults {
+	netProfit: number,
+	maxDropdown: number,
+	exposure: number
+}
+
+export interface BaseBacktest {
+	createdAt: number,
+	accountId: string,
+	versionNumber: string,
+	config: BacktestConfig,
+	quickResults: QuickBacktestResults
+	fullResultsPath: string
+}
+export interface DynamoBacktest extends BaseBacktest {
+	resourceId: string
+}
+
+export interface ModelBacktest extends BaseBacktest {
+	id: string
+	botId: string
+}
+
+export interface CreateBacktestInput extends ModelBacktest {
+	fullResults: string
+}

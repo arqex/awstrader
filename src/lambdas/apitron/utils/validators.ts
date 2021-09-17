@@ -12,7 +12,7 @@ interface ShapeValidatorResult {
 	error?: ShapeValidationError
 }
 
-export function validateShape(obj: any, shape: any): ShapeValidatorResult{
+export function validateShape(obj: any, shape: any): ShapeValidatorResult {
 	for( const key in shape ){
 		const {error} = validateElement( obj[key], shape[key] );
 		if( error ){
@@ -43,6 +43,8 @@ function validateElement(value: any, type: any): ShapeValidatorResult{
 }
 
 function validateArray(arr: any[], type: string): ShapeValidatorResult {
+	if( !Array.isArray(arr) ) return {error: {code: 'invalid_value', reason: 'Not an array'}};
+
 	for( let i = 0; i<arr.length; i++ ){
 		let {error} = validateElement(arr[i], type);
 		if( error ){
@@ -71,8 +73,25 @@ function validateFinalType( value: any, type: string ){
 
 
 export function isValid( value: any, type: string ){
+	let isMap = type.match(/^map\(([^)]+)\)$/);
+	if( isMap ){
+		return validateMap( value, isMap[1] );
+	}
 	return validators[type](value);
 }
+
+function validateMap( map, type ){
+	if( !map ) return false;
+	let keys = Object.keys(map);
+	let i = keys.length;
+	while( i-- > 0 ){
+		if( !isValid(map[keys[i]], type) ){
+			return false;
+		}
+	}
+	return true;
+}
+
 
 const validIntervals = {
 	'1h': true
@@ -80,6 +99,7 @@ const validIntervals = {
 
 const validators = {
 	string: value => typeof value === 'string',
+	number: value => typeof value === 'number',
 	runInterval: value => validIntervals[value] === true,
 	pairs: validatePairs,
 	boolean: value => typeof value === 'boolean',
@@ -90,7 +110,10 @@ const validators = {
 	botVersionType: oneOf(['minor', 'major']),
 	botVersion: validateBotVersion,
 	lockedVersion: value => value === true,
-	versionLabel: value => typeof value === 'string' && value.length <= 20
+	versionLabel: value => typeof value === 'string' && value.length <= 20,
+	id: value => value.match(/^[a-zA-Z0-9_\-]{22}$/),
+	doubleId: value => value.match(/^[a-zA-Z0-9_\-]{44}$/),
+	tripleId: value => value.match(/^[a-zA-Z0-9_\-]{66}$/)
 }
 
 function validatePairs( pairs ){
@@ -133,7 +156,7 @@ function validateBotVersion( version: string ){
 	if( !version || typeof version !== 'string' ) return false;
 
 	let parts = version.split('.');
-	if( parts.length !== 2 ) return;
+	if( parts.length !== 2 ) return false;
 
 	return (
 		parseInt(parts[0], 10).toString() === parts[0] &&

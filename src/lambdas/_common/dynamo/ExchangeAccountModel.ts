@@ -72,10 +72,11 @@ export default {
 
 		if (account.type === 'virtual') {
 			console.log('Createing last portfolio and orders');
-			promises = [...promises, ...[
+			promises = [
+				...promises,
 				saveLastPortfolio( accountId, exchangeId, JSON.stringify(account.initialBalances)),
 				saveOrders( accountId, exchangeId, '{}')
-			]];
+			];
 		}
 
 		// @ts-ignore

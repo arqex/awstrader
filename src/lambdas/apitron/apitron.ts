@@ -17,6 +17,7 @@ import * as serverless from 'serverless-http';
 import { DbExchangeAccount } from '../model.types';
 import BotVersionModel from '../_common/dynamo/BotVersionModel';
 import botVersionsAPI from './botVersions/botVersionsAPI';
+import backtestsAPI from './backtests/backtestsAPI';
 
 const app = express()
 
@@ -52,6 +53,7 @@ app.post('/tickerUpdater', function( req, res ){
 	})
 });
 
+backtestsAPI.initialize(app);
 botsAPI.initialize(app);
 botVersionsAPI.initialize(app);
 deploymentAPI.initialize(app);

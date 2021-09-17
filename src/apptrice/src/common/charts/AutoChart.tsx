@@ -31,9 +31,9 @@ export default class AutoChart extends React.Component<AutoChartProps> {
 	state: AutoChartState = {
 		loadingDate: undefined,
 		alreadyLoadedDate: undefined,
-		chartStartDate: this.getDateToLoad( this.props.interval, this.props.startDate ),
+		chartStartDate: this.getDateToLoad( this.props.interval, this.props.endDate ),
 		candles: undefined,
-		hasMore: false
+		hasMore: true
 	}
 		
 	render() {
@@ -65,7 +65,7 @@ export default class AutoChart extends React.Component<AutoChartProps> {
 				alreadyLoadedDate: undefined,
 				chartStartDate: this.getDateToLoad( this.props.interval, this.props.startDate ),
 				candles: undefined,
-				hasMore: false
+				hasMore: true
 			});
 		}
 		this.checkCandlesLoad();
@@ -82,8 +82,8 @@ export default class AutoChart extends React.Component<AutoChartProps> {
 	}
 
 	checkCandlesLoad() {
-		const {loadingDate, chartStartDate, alreadyLoadedDate, candles } = this.state;
-		if( loadingDate ) return;
+		const {loadingDate, chartStartDate, alreadyLoadedDate, candles, hasMore } = this.state;
+		if( !hasMore || loadingDate ) return;
 
 		if( alreadyLoadedDate === undefined ){
 			const {interval, endDate} = this.props;
@@ -92,7 +92,7 @@ export default class AutoChart extends React.Component<AutoChartProps> {
 		}
 
 		let loadedDate = alreadyLoadedDate || Date.now();
-		if( candles && chartStartDate < candles[50][0] ){
+		if( candles && chartStartDate < candles[0][0] ){
 			const {interval} = this.props;
 			const dateToLoad = this.getDateToLoad(interval, loadedDate);
 			return this.loadCandles(dateToLoad, loadedDate);
@@ -106,10 +106,15 @@ export default class AutoChart extends React.Component<AutoChartProps> {
 		});
 
 		if( candles ){
-			this.setState({
-				candles: [...candles, ...(this.state.candles || [])],
-				alreadyLoadedDate: dateToLoad
-			})
+			if( !candles.length ){
+				this.setState({hasMore: false});
+			}
+			else {
+				this.setState({
+					candles: [...candles, ...(this.state.candles || [])],
+					alreadyLoadedDate: dateToLoad
+				})
+			}
 		}
 		else {
 			this.setState({loadingDate: dateToLoad});

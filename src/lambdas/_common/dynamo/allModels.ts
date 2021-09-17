@@ -1,11 +1,13 @@
 import AccountModel from './AccountModel';
+import BacktestModel from './BacktestModel';
 import BotDeploymentModel from './BotDeploymentModel';
 import BotModel from './BotModel';
 import BotVersionModel from './BotVersionModel';
 import ExchangeAccountModel from './ExchangeAccountModel';
 
 export interface DynamoModels {
-	account: typeof AccountModel
+	account: typeof AccountModel,
+	backtest: typeof BacktestModel,
 	bot: typeof BotModel,
 	botVersion: typeof BotVersionModel,
 	deployment: typeof BotDeploymentModel,
@@ -14,6 +16,7 @@ export interface DynamoModels {
 
 const allModels: DynamoModels = {
 	account: AccountModel,
+	backtest: BacktestModel,
 	bot: BotModel,
 	botVersion: BotVersionModel,
 	deployment: BotDeploymentModel,

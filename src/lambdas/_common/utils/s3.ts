@@ -29,14 +29,17 @@ interface S3Accessor {
 
 interface S3Helper {
 	botState: S3Accessor,
-	exchanges: S3Accessor
+	exchanges: S3Accessor,
+	backtests: S3Accessor
 }
 
 const s3Helper: S3Helper = {
 	// @ts-ignore
 	botState: createAccessor(process.env.STATE_BUCKET),
 	// @ts-ignore
-	exchanges: createAccessor(process.env.EXCHANGES_BUCKET)
+	exchanges: createAccessor(process.env.EXCHANGES_BUCKET),
+	// @ts-ignore
+	backtests: createAccessor(process.env.BACKTESTS_BUCKET)
 }
 
 function createAccessor( bucket: string ): S3Accessor {

@@ -41,7 +41,7 @@ export default class BitfinexAdapter implements ExchangeAdapter {
 		if (candles) {
 			return candles;
 		}
-		const exchangeSegment = toExchangePair(options.market);
+		const exchangeSegment = encodeURIComponent(toBfxPair(options.market));
 		const pathParams = `candles/trade:${getCandleInterval(options.runInterval)}:${exchangeSegment}/hist`;
 		const queryParams = `limit=${options.candleCount}&end=${options.lastCandleAt}`;
 
@@ -59,7 +59,7 @@ export default class BitfinexAdapter implements ExchangeAdapter {
 		let toSubmit = orders.map( order => {
 			let bfxOptions: any = {
 				type: getBfxOrderType(order.type),
-				symbol: toExchangePair(order.pair),
+				symbol: toBfxPair(order.pair),
 				amount: order.direction === 'buy' ? order.amount : -order.amount
 			};
 
@@ -148,9 +148,9 @@ function getKey(options: CandleQuery): string {
 	return `${options.market}:${options.runInterval}:${options.lastCandleAt}:${options.candleCount}`;
 }
 
-function toExchangePair(market) {
+function toBfxPair(market) {
 	let assets = market.split('/');
-	let separator = market.length !== 7 ? '%3A' : '';
+	let separator = market.length !== 7 ? ':' : '';
 	console.log( market, market.length, separator);
 	return `t${assets[0]}${separator}${assets[1]}`;
 }
@@ -188,6 +188,10 @@ function convertToExchangeOrder(rawOrder): ExchangeOrder {
 }
 
 function getOrderPair( pair: string ) {
+	if( pair.includes(':') ){
+		let parts = pair.split(':');
+		return `${parts[0].slice(1)}/${parts[1]}`;
+	}
 	return pair.slice(1, pair.length -3) + '/' + pair.slice(-3);
 }
 
