@@ -23,7 +23,7 @@ service: awstrader
 custom:
   stateBucket: aws-trader-${self:provider.stage}-bot-states #unique global name it will create for the bucket
   exchangesBucket: aws-trader-${self:provider.stage}-exchanges #unique global name it will create for the bucket
-  backtestBucket: aws-trader-${self:provider.stage}-backtests
+  backtestsBucket: aws-trader-${self:provider.stage}-backtests
   dynamodb:
     stages:
       - ${self:provider.stage}
