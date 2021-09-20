@@ -35,7 +35,8 @@ function validateElement(value: any, type: any): ShapeValidatorResult{
 	}
 
 	if (Array.isArray(type)) {
-		return validateArray(value, value[0]);
+		console.log('Validating array', type);
+		return validateArray(value, type[0]);
 	}
 
 	// Object
@@ -75,7 +76,13 @@ function validateFinalType( value: any, type: string ){
 export function isValid( value: any, type: string ){
 	let isMap = type.match(/^map\(([^)]+)\)$/);
 	if( isMap ){
+		console.log('Validating a map', value, isMap[1]);
 		return validateMap( value, isMap[1] );
+	}
+
+	if( !validators[type] ){
+		console.error(`validators[${type}] is not a function`);
+		return false
 	}
 	return validators[type](value);
 }

@@ -1,5 +1,5 @@
-import { DbBot, FullBotDeployment, DbExchangeAccount, ModelBotDeployment } from '../../../lambdas/model.types';
-import { BtActive } from '../utils/backtest/Bt.types';
+import { DbBot, FullBotDeployment, DbExchangeAccount, ModelBotDeployment, ModelBacktest, RunnableDeployment } from '../../../lambdas/model.types';
+import { BtActive, BtExchange } from '../utils/backtest/Bt.types';
 import lorese from './Lorese';
 
 export interface StoreAccount {
@@ -20,17 +20,31 @@ export interface StoreBotVersion {
 	updatedAt: number
 }
 
+export interface StoreBot extends DbBot {
+	backtests?: string[]
+}
+
+export interface StoreBacktest extends ModelBacktest {
+	fullResults? : {
+		exchange: BtExchange,
+		deployment: RunnableDeployment
+	}
+}
+
 export type StoreBotDeployment = ModelBotDeployment | FullBotDeployment;
 export interface Store {
 	authenticatedId: string
 	accounts: {
 		[id: string]: StoreAccount
 	},
+	backtests: {
+		[id: string]: StoreBacktest
+	},
 	deployments: {
 		[id: string]: StoreBotDeployment
 	},
 	bots: {
-		[id:string]: DbBot
+		[id:string]: StoreBot
 	},
 	exchangeAccounts: {
 		[id:string]: DbExchangeAccount
@@ -49,6 +63,7 @@ const manager = lorese<Store>({
 	accounts: {
 		'0000000000000000000000': {id: '0000000000000000000000'} 
 	},
+	backtests: {},
 	deployments: {},
 	bots: {},
 	exchangeAccounts: {},
@@ -57,6 +72,9 @@ const manager = lorese<Store>({
 		candles: {}
 	}
 })
+
+// @ts-ignore
+window.stateManager = manager;
 
 const { addChangeListener, removeChangeListener, emitStateChange, loader, reducer, selector} = manager;
 export { addChangeListener, removeChangeListener, emitStateChange, loader, reducer, selector};

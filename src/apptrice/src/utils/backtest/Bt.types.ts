@@ -1,6 +1,6 @@
 
 import { BotCandles } from "../../../../lambdas/lambda.types";
-import { ActiveInterval, ConsoleEntry, DBBotDeploymentState, DeploymentOrders, PortfolioHistoryItem, RunInterval, RunnableDeployment } from "../../../../lambdas/model.types";
+import { ActiveInterval, BacktestConfig, ConsoleEntry, DBBotDeploymentState, DeploymentOrders, PortfolioHistoryItem, RunInterval, RunnableDeployment } from "../../../../lambdas/model.types";
 import { ScreenProps } from "../../types";
 
 export interface BtDeployment {
@@ -36,6 +36,7 @@ export interface BtActive {
 	candles: BotCandles
 	status: BtStatus
 	data: BtStored
+	config: BacktestConfig
 }
 
 export interface ActiveBtUpdate {

@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { Portfolio } from '../../../lambdas/lambda.types';
+import { CreateBacktestInput, CreateBacktestRequestPayload } from '../../../lambdas/model.types';
 
 export interface CandleOptions {
 	pair: string
@@ -69,6 +70,28 @@ const apiClient = {
 	//////////
 	loadAccountData( accountId: string ): Promise<AxiosResponse>{
 		return axios.get(`${API_URL}/accounts/${accountId}`)
+			.then( res => {
+				console.log(res);
+				return res;
+			})
+		;
+	},
+
+
+	////////////
+	// BACKTESTS
+	////////////
+
+	createBacktest( input: CreateBacktestRequestPayload ){
+		return axios.post(`${API_URL}/bots/${input.botId}/backtests`, input)
+			.then( res => {
+				return res;
+			})
+		;
+	},
+
+	getBotBacktests( botId: string ){
+		return axios.get(`${API_URL}/bots/${botId}/backtests`)
 			.then( res => {
 				console.log(res);
 				return res;

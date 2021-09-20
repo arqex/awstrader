@@ -320,9 +320,9 @@ export interface BacktestConfig {
 }
 
 export interface QuickBacktestResults {
-	netProfit: number,
-	maxDropdown: number,
-	exposure: number
+	netProfitPercent: number,
+	maxDropdownPercent: number,
+	exposurePercent: number
 }
 
 export interface BaseBacktest {
@@ -343,5 +343,14 @@ export interface ModelBacktest extends BaseBacktest {
 }
 
 export interface CreateBacktestInput extends ModelBacktest {
+	fullResults: string
+}
+
+export interface CreateBacktestRequestPayload {
+	accountId: string,
+	botId: string,
+	versionNumber: string,
+	config: BacktestConfig,
+	quickResults: QuickBacktestResults
 	fullResults: string
 }

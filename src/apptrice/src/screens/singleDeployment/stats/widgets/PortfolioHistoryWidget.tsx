@@ -29,7 +29,7 @@ export default class PortfolioHistoryWidget extends React.Component<PortfolioHis
 	}
 
 	renderContent() {
-		if( !this.hasHistory() ){
+		if( !this.hasRun() ){
 			return 'This bot has not been run yet.';
 		}
 
@@ -103,9 +103,12 @@ export default class PortfolioHistoryWidget extends React.Component<PortfolioHis
 		;
 	}
 
-	hasHistory(){
-		const {portfolioHistory} = this.props.deployment;
-		return portfolioHistory && portfolioHistory.length > 0;
+	hasRun(){
+		const {deployment} = this.props;
+		if( !deployment || deployment.state.newState || !deployment.portfolioHistory ) return false;
+
+		const {portfolioHistory} = deployment;
+		return portfolioHistory && Object.keys(portfolioHistory).length > 0;
 	}
 }
 

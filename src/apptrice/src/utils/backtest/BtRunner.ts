@@ -7,6 +7,8 @@ import { BtExchange } from "./Bt.types";
 import { StoreBotVersion } from "../../state/stateManager";
 import { getActiveBt } from "../../state/selectors/bt.selectors";
 import { BtUpdater } from "../../state/updaters/bt.updater";
+import apiCacher from "../../state/apiCacher";
+import { getStats } from '../../common/deplotymentStats/statsCalculator'
 
 let runner: BtBotRunner;
 const BtRunner = {
@@ -46,7 +48,7 @@ async function prepareAndRun(btid: string, version: StoreBotVersion, options: Ba
 		exchange: 'bitfinex'
 	});
 
-	setInitialBt(btid, version, runner);
+	setInitialBt(btid, version, runner, options);
 
 	BtUpdater.update({
 		status: 'candles'
@@ -64,10 +66,13 @@ async function prepareAndRun(btid: string, version: StoreBotVersion, options: Ba
 	await runIterations( version, runner );
 
 	BtUpdater.update({ status: 'completed' });
+
+	consolidateBacktest();
+
 	runner.bot?.terminate();
 }
 
-function setInitialBt(btid: string, version: StoreBotVersion, runner: BtBotRunner) {
+function setInitialBt(btid: string, version: StoreBotVersion, runner: BtBotRunner, config: BacktestConfig) {
 	BtUpdater.setBt({
 		totalIterations: 0,
 		currentIteration: 0,
@@ -84,7 +89,8 @@ function setInitialBt(btid: string, version: StoreBotVersion, runner: BtBotRunne
 				fees: runner.exchange.fees,
 				slippage: runner.exchange.slippage
 			}
-		}
+		},
+		config
 	});
 }
 
@@ -109,4 +115,27 @@ function toBtExchange( exchange: DbExchangeAccount ): BtExchange{
 		fees: exchange.fees,
 		slippage: exchange.slippage
 	};
+}
+
+function consolidateBacktest(){
+	let activeBt = getActiveBt();
+	if( !activeBt ) return;
+
+	console.log('Consolidating BT', activeBt);
+	const {accountId, botId, versionNumber, deployment, exchange} = activeBt.data;
+	const {netProfitPercent, maxDropdownPercent, exposurePercent} = getStats(deployment);
+	let bt = {
+		accountId,
+		botId,
+		versionNumber,
+		config: activeBt.config,
+		quickResults: {
+			netProfitPercent, maxDropdownPercent, exposurePercent
+		},
+		fullResults: JSON.stringify({deployment, exchange})
+	}
+
+	apiCacher.createBacktest(bt)
+		.then( () => BtUpdater.clear() )
+	;
 }

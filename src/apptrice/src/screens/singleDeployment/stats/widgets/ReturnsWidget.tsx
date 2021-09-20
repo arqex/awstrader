@@ -28,7 +28,7 @@ export default class ReturnsWidget extends React.Component<ReturnsWidgetProps> {
 
 
 	renderContent() {
-		if( !this.hasHistory() ){
+		if( !this.hasRun() ){
 			return 'This bot has not been run yet.';
 		}
 
@@ -42,9 +42,9 @@ export default class ReturnsWidget extends React.Component<ReturnsWidgetProps> {
 		);
 	}
 
-	hasHistory(){
+	hasRun(){
 		const {deployment} = this.props;
-		if( !deployment || !deployment.portfolioHistory ) return false;
+		if( !deployment || deployment.state.newState || !deployment.portfolioHistory ) return false;
 
 		const {portfolioHistory} = deployment;
 		return portfolioHistory && Object.keys(portfolioHistory).length > 0;

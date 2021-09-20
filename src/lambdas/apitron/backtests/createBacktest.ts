@@ -1,15 +1,15 @@
-import { DynamoBacktest, ModelBacktest } from "../../model.types";
+import { CreateBacktestRequestPayload, DynamoBacktest, ModelBacktest } from "../../model.types";
 import { createId, parseId } from "../../_common/utils/resourceId";
 import { ContextResult, Mutation, MutationContextInput, MutationGetterInput, MutationHandler, MutationResponseInput, ResponseResult } from "../apitron.types";
 import { validateShape } from "../utils/validators";
 
 const createBacktestHandler: MutationHandler = {
 	name: 'createBacktest',
-	async getContext({body, params, models}: MutationContextInput<any>): Promise<ContextResult> {
+	async getContext({body, params, models}: MutationContextInput<CreateBacktestRequestPayload>): Promise<ContextResult> {
 		// Validate input
 		let {error} = validateShape(body, {
 			accountId: 'id',
-			botId: 'doubleid',
+			botId: 'doubleId',
 			versionNumber: 'botVersion',
 			config: configShape,
 			quickResults: quickResultsShape,
@@ -60,7 +60,7 @@ const configShape = {
 	baseAssets: ['string'],
 	quotedAsset: 'string',
 	runInterval: 'runInterval',
-	initialBalances: 'map(string)',
+	initialBalances: 'map(number)',
 	startDate: 'number',
 	endDate: 'number',
 	fees: 'number',
@@ -68,7 +68,7 @@ const configShape = {
 };
 
 const quickResultsShape = {
-	netProfit: 'number',
-	maxDropdown: 'number',
-	exposure: 'number'
+	netProfitPercent: 'number',
+	maxDropdownPercent: 'number',
+	exposurePercent: 'number'
 }
