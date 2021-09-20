@@ -1,8 +1,8 @@
 import { AxiosResponse } from 'axios';
 import { getActivatedDeployment, getDeactivatedDeployment } from '../../../lambdas/_common/utils/deploymentUtils';
 import apiClient, { CandleOptions, CreateExchangeAccountInput, UpdateBotInput, UpdateDeploymentInput, CreateDeploymentInput, CreateBotInput, CreateBotVersionInput, UpdateBotVersionInput } from './apiClient';
-import {reducer} from './stateManager';
-import { CreateBacktestInput, CreateBacktestRequestPayload, DbBot, VersionHistory } from '../../../lambdas/model.types';
+import {reducer, Store} from './stateManager';
+import { CreateBacktestInput, CreateBacktestRequestPayload, DbBot, ModelBacktest, VersionHistory } from '../../../lambdas/model.types';
 import { getCandlesKey, getVersionKey } from './storeKeys';
 import { parseTripleId } from '../../../lambdas/_common/utils/resourceId';
 
@@ -24,9 +24,11 @@ const apiCacher = {
 					const {fullResults, ...baseBt} = input;
 					const bot = {...store.bots[input.botId]};
 					const {accountId, parentId, resourceId} = parseTripleId(id);
-					bot.backtests = [
-						id, ...(bot.backtests || [])
-					];
+					if( bot.backtests ){
+						bot.backtests = [
+							id, ...bot.backtests
+						];
+					}
 					
 					return {
 						...store,
@@ -45,6 +47,34 @@ const apiCacher = {
 						}
 					};
 				})(res.data.id);
+				return res;
+			})
+		;
+	},
+
+	loadBotBacktests(botId: string) {
+		return apiClient.loadBotBacktests(botId)
+			.then( res => {
+				reducer<ModelBacktest[]>( (store, backtests) => {
+					let storeBacktests = { ...store.backtests};
+					let ids: string[] = [];
+					backtests.forEach( bt => {
+						storeBacktests[bt.id] = bt;
+						ids.push(bt.id);
+					});
+
+					return {
+						...store,
+						backtests: storeBacktests,
+						bots: {
+							...store.bots,
+							[botId]: {
+								...store.bots[botId],
+								backtests: ids
+							}
+						}
+					};
+				})(res.data);
 				return res;
 			})
 		;

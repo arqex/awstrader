@@ -90,7 +90,7 @@ const apiClient = {
 		;
 	},
 
-	getBotBacktests( botId: string ){
+	loadBotBacktests( botId: string ){
 		return axios.get(`${API_URL}/bots/${botId}/backtests`)
 			.then( res => {
 				console.log(res);

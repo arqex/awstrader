@@ -5,9 +5,16 @@ import { ScreenWrapper, Tabs, Tab } from '../../../components';
 import BtStats from './sections/BtStats';
 import { BtActive } from '../../../utils/backtest/Bt.types';
 import { getActiveBt } from '../../../state/selectors/bt.selectors';
+import { BotScreenProps } from '../BotScreenProps';
+import { botBacktestsLoader } from '../../../state/loaders/botBacktests.loader';
 
-export default class BotBtScreen extends React.Component<ScreenProps> {
+export default class BotBtScreen extends React.Component<BotScreenProps> {
 	render() {
+		let {data: backtests} = botBacktestsLoader( this.props.bot.id );
+		if( !backtests ){
+			return <span>Loading...</span>;
+		}
+		console.log( backtests );
 		return (
 			<ScreenWrapper title="Backtest">
 				{ this.renderContent() }
