@@ -54,18 +54,21 @@ function delResults( path: string ){
 
 
 function dynamoToModel(dynamo: DynamoBacktest): ModelBacktest {
-	const {resourceId, ...baseBt} = dynamo;
+	const {resourceId, accountId, ...baseBt} = dynamo;
 	const [botId, id] = resourceId.split('#').slice(1);
+	
 	return {
 		...baseBt,
-		botId,
-		id
+		accountId,
+		botId: botId + accountId,
+		id: id + botId + accountId 
 	}
 }
 
 function modelToDynamo(model: ModelBacktest): DynamoBacktest {
 	const {id, botId, ...baseBt} = model;
 	const {parentId, resourceId} = parseTripleId(id);
+	console.log('modeltoDynamo', id, parentId, resourceId);
 	return {
 		...baseBt,
 		resourceId: getResourceId(parentId, resourceId)

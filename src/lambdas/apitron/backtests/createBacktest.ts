@@ -34,7 +34,7 @@ const createBacktestHandler: MutationHandler = {
 		const id = createId();
 		const model = {
 			...input.body,
-			id: botId + id,
+			id: id + botId,
 			createdAt: Date.now(),
 			fullResultsPath: `${accountId}/${resourceId}/${id}.json`
 		}

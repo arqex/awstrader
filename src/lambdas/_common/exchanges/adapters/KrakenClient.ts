@@ -6,7 +6,7 @@ interface GetAssetInfoOptions {
 	assets: string[],
 	aclass: string
 }
-interface GetTradableAssetPairsOptions {
+interface GetAssetPairsOptions {
 	pairs: string[],
 	infoType?: 'all' | 'leverage' | 'fees' | 'margin'
 }
@@ -27,9 +27,9 @@ export class KrakenClient {
 	static pub = {
 		getTime() {},
 		getSystemStatus(){},
-		getAssetInfo(options: GetAssetInfoOptions){},
-		getTradableAssetPairs(options: GetTradableAssetPairsOptions){},
-		getTickerInfo(pair: string){},
+		getAssets(options: GetAssetInfoOptions){},
+		getAssetPairs(options: GetAssetPairsOptions){},
+		getTicker(pair: string){},
 		/** Return max 720 candles */
 		getOHLC(options: OHLCOptions){},
 		getOrderBook(options: OrderBookOptions){},
@@ -49,6 +49,4 @@ export class KrakenClient {
 	getTradeBalance() {
 
 	}
-
-	async get
 }

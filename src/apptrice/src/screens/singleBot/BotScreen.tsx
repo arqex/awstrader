@@ -43,21 +43,12 @@ export default class BotScreen extends React.Component<ScreenProps> {
 		return [
 			{ name: 'Details', icon: 'percentage', link: `#/bots/${id}` },
 			{ name: 'Editor', icon: 'code', link: `#/bots/${id}/editor` },
-			{ name: 'Backtest', icon: 'chart-bar', link: `#/bots/${id}/backtesting` }
+			{ name: 'Backtest', icon: 'chart-bar', link: `#/bots/${id}/backtests` }
 		]
 	}
 
 	getSubscreen() {
 		return this.props.router.location.matches[2] || BotDetailsScreen;
-	}
-
-	getMenuItems() {
-		let botId = this.props.router.location.params.id;
-		return [
-			{ id: 'details', label: 'Details', link: `#/bots/${botId}/details` },
-			{ id: 'editor', label: 'Editor', link: `#/bots/${botId}/editor` },
-			{ id: 'backtesting', label: 'Backtesting', link: `#/backTesting/${botId}` },
-		]
 	}
 
 	getActiveItem() {

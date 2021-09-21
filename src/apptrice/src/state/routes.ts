@@ -18,6 +18,7 @@ import BtOrders from "../screens/singleBot/botBt/sections/BtOrders";
 import BtCharts from "../screens/singleBot/botBt/sections/BtCharts";
 import BtState from "../screens/singleBot/botBt/sections/BtState";
 import BtLogs from "../screens/singleBot/botBt/sections/BtLogs";
+import BacktestsScreen from "../screens/singleBot/botBt/BacktestsScreen";
 
 const routes = [
 	{path: '/', cb: HomeScreen},
@@ -35,6 +36,7 @@ const routes = [
 		{path: '/:id', cb: BotScreen, children: [
 			{ path: '/details', cb: BotDetailsScreen },
 			{ path: '/editor', cb: BotEditorScreen },
+			{ path: '/backtests', cb: BacktestsScreen },
 			{ path: '/backtesting', cb: BotBtScreen, children: [
 				{path: '/stats', cb: BtStats},
 				{path: '/charts', cb: BtCharts},

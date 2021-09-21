@@ -1,8 +1,8 @@
 import {loader, StoreBacktest} from '../stateManager';
 import apiCacher from '../apiCacher';
-import { getAccountBotsSelector } from '../selectors/bot.selectors';
+import { getBotBacktestsSelector } from '../selectors/backtests.selectors';
 
 export const botBacktestsLoader = loader<string,StoreBacktest[]>({
-	selector: getAccountBotsSelector,
+	selector: getBotBacktestsSelector,
 	load: (botId: string) => apiCacher.loadBotBacktests(botId)
 });

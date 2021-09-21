@@ -1,5 +1,4 @@
-import * as React from 'react'
-import { ScreenProps } from '../../../types';
+import * as React from 'react';
 import styles from './_BotBtScreen.module.css';
 import { ScreenWrapper, Tabs, Tab } from '../../../components';
 import BtStats from './sections/BtStats';
