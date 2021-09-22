@@ -388,10 +388,11 @@ export default class CreateDeploymentForm extends React.Component<CreateDeployme
 						botVersion = this.getLastBotVersion(bot);
 					}
 				}
+				
 				this.setState({
 					botId,
 					botVersion,
-					exchangeAccountId: exchanges.length ? exchanges[0].id : ''
+					exchangeAccountId: exchanges.find( ex => ex.type === 'real')?.id || ''
 				});
 			}
 		}

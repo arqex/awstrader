@@ -129,7 +129,7 @@ const memoGetData = memoizeOne( (portfolioHistory: PortfolioHistoryItem[] ) => {
 		assets.forEach( (asset:string) => {
 			let balance = item.balances[asset];
 			if( balance ){
-				total += (balance.total * balance.price);
+				total += (balance.total || 0) * balance.price;
 			}
 			sets[asset].push( total );
 		});

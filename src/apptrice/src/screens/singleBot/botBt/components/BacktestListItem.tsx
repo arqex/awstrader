@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { ModelBacktest } from '../../../../../../lambdas/model.types';
 import styles from './_BacktestListItem.module.css';
+import {formatDistance} from 'date-fns';
 
 interface BacktestListItemProps {
 	backtest: ModelBacktest,
@@ -16,8 +17,10 @@ export default class BacktestListItem extends React.Component<BacktestListItemPr
 		console.log('Rendering backtest', backtest);
 		return (
 			<div className={styles.container} onClick={this._onClick}>
-				<div>v{backtest.versionNumber}</div>
-				<div>{backtest.createdAt}</div>
+				<div>
+					<span>v{backtest.versionNumber}</span>
+					<span>{ formatDistance(backtest.createdAt, Date.now()) }</span>
+				</div>
 			</div>
 		)
 	}

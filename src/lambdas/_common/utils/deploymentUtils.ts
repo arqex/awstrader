@@ -47,7 +47,7 @@ export function getPortfolioValue( portfolio: PortfolioWithPrices ){
 	let total = 0;
 	Object.keys( portfolio ).forEach( asset => {
 		const balance = portfolio[asset];
-		total += balance.total * balance.price;
+		total += (balance.total || 0) * balance.price;
 	});
 	return total;
 }
