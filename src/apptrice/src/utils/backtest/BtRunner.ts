@@ -8,7 +8,7 @@ import { StoreBotVersion } from "../../state/stateManager";
 import { getActiveBt } from "../../state/selectors/bt.selectors";
 import { BtUpdater } from "../../state/updaters/bt.updater";
 import apiCacher from "../../state/apiCacher";
-import { getStats } from '../../common/deplotymentStats/statsCalculator'
+import { getStats } from '../../common/deplotymentStats/statsCalculator';
 
 let runner: BtBotRunner;
 const BtRunner = {

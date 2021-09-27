@@ -39,8 +39,9 @@ export interface UpdateBotVersionInput {
 }
 
 export interface UpdateDeploymentInput {
-	accountId: string,
-	active: boolean
+	active?: boolean,
+	name?: string,
+	version?: string
 }
 
 export interface CreateBotInput {

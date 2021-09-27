@@ -1,0 +1,43 @@
+.container {
+	margin: 10px;
+	padding: 10px;
+	border-bottom: 1px solid #fff1;
+	width: 200px;
+	cursor: pointer;
+}
+
+.container:hover {
+	background-color: #fff1;
+}
+
+.title {
+	margin-bottom: 6px;
+}
+
+.createdAt {
+	display: inline-block;
+	margin-left: 10px;
+	font-size: .75em;
+	opacity: .7;
+}
+
+.assets {
+	font-size: .8em;
+	opacity: .8;
+	margin-bottom: 6px;
+}
+
+.stats {
+	font-size: .8em;
+}
+
+.positiveProfit {
+	color:#3dc9b0;
+}
+.negativeProfit {
+	color: #f390dd;
+}
+
+.dropdown, .exposure {
+	opacity: .8;
+}

@@ -56,14 +56,18 @@ const updateDeploymentHandler: MutationHandler = {
 				mutation = {
 					model: 'deployment',
 					action: 'update',
-					data: {}
+					data: {
+						id: input.params.deploymentId,
+						update: {}
+					}
 				}
 			}
 			
-			if( name ) mutation.data.name = name.trim();
-			if( version ) mutation.data.version = version;
+			if( name ) mutation.data.update.name = name.trim();
+			if( version ) mutation.data.update.version = version;
 		}
 		
+		console.log(mutation);
 		return [mutation];
 	},
 

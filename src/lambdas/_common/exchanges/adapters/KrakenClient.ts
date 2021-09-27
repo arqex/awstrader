@@ -1,5 +1,7 @@
 import * as T from "./KrakentClient.types";
 import fetch from 'node-fetch';
+import {stringify} from 'query-string';
+import {createHash, createHmac} from 'crypto';
 
 export class KrakenClient {
 	static pub = {
@@ -173,7 +175,7 @@ function dataToString(data: {[key: string]: any}) {
 function callPublicMethod( config: T.KrakenClientConfig, path: string, data?: {[key: string]: any} ) {
 	let url = `${config.baseUrl}/${config.version}/${path}`;
 	if( data ){
-		url += `?${dataToString(data)}`;
+		url += `?${stringify(data, {arrayFormat: 'comma'})}`;
 	}
 
 	return fetch(url)
@@ -190,5 +192,37 @@ function callPublicMethod( config: T.KrakenClientConfig, path: string, data?: {[
 function callPrivateMethod( config: T.KrakenClientConfig, path: string, data: {[key: string]: any} ) {
 	const url = `${config.baseUrl}/${config.version}/${path}`;
 	const nonce = Date.now() + config.nonceOffset;
+	const body = stringify(data, {arrayFormat: 'comma'});
+	const requestOptions = {
+		method: 'POST',
+		headers: {
+			'API-Key': config.apiKey,
+			'API-Sign': getMessageSignature(`/${config.version}/${path}`, body, config.privateKey, nonce),
+			'Content-Type': 'Content-Type: application/x-www-form-urlencoded; charset=utf-8',
+			'User-Agent': 'Kraken JS client'
+		},
+		body
+	};
 
+	return fetch(url, requestOptions)
+		.then( response => response.json() )
+		.then( json => {
+			if( json.error.length ){
+				throw new Error(json.error[0]);
+			}
+			return json.error.result;
+		})
+	;
 }
+
+// Create a signature for a request
+const getMessageSignature = (path: string, request: string, secret: string, nonce: number) => {
+	const secret_buffer = Buffer.from(secret, 'base64');
+	const hash          = createHash('sha256');
+	const hmac          = createHmac('sha512', secret_buffer);
+	// @ts-ignore
+	const hash_digest   = hash.update(nonce + message).digest('binary');
+	const hmac_digest   = hmac.update(path + hash_digest, 'binary').digest('base64');
+
+	return hmac_digest;
+};

@@ -90,7 +90,8 @@ resources:
         BucketName: ${self:custom.exchangesBucket} # Getting the name of table I defined under custom in serverless.yml
         CorsConfiguration:
           CorsRules:
-            - AllowedMethods:
+            - 
+              AllowedMethods:
                 - GET
                 - HEAD
               AllowedOrigins:
@@ -103,7 +104,8 @@ resources:
         BucketName: ${self:custom.backtestsBucket} # Getting the name of table I defined under custom in serverless.yml
         CorsConfiguration:
           CorsRules:
-            - AllowedMethods:
+            -
+              AllowedMethods:
                 - GET
                 - HEAD
               AllowedOrigins:

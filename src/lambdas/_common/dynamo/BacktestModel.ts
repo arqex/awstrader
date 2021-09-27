@@ -41,7 +41,7 @@ export default {
 
 const resultsMeta = {
 	CacheControl: 'max-age=99999999',
-	ContentType: 'application/json',
+	ContentType: 'text/plain',
 	ACL: 'public-read'
 }
 function saveResults( path: string, results: string ){

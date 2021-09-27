@@ -5,6 +5,8 @@ import {reducer, Store} from './stateManager';
 import { CreateBacktestInput, CreateBacktestRequestPayload, DbBot, ModelBacktest, VersionHistory } from '../../../lambdas/model.types';
 import { getCandlesKey, getVersionKey } from './storeKeys';
 import { parseTripleId } from '../../../lambdas/_common/utils/resourceId';
+import { getBacktestsUrl } from './selectors/environment.selectors';
+import lzString from 'lz-string';
 
 const apiCacher = {
 	///////////
@@ -18,10 +20,14 @@ const apiCacher = {
 	// BACKTESTS
 	////////////
 	createBacktest(input: CreateBacktestRequestPayload ){
-		return apiClient.createBacktest(input)
+		const {fullResults, ...baseBt} = input;
+		const payload = {
+			...baseBt,
+			fullResults: lzString.compress(fullResults)
+		};
+		return apiClient.createBacktest(payload)
 			.then( res => {
 				reducer<string>( (store, id) => {
-					const {fullResults, ...baseBt} = input;
 					const bot = {...store.bots[input.botId]};
 					const {accountId, parentId, resourceId} = parseTripleId(id);
 					if( bot.backtests ){
@@ -39,7 +45,7 @@ const apiCacher = {
 						backtests: {
 							...store.backtests,
 							[id]: {
-								...baseBt,
+								...input,
 								id,
 								createdAt: Date.now(),
 								fullResultsPath: `${accountId}/${parentId}/${resourceId}.json`
@@ -76,6 +82,28 @@ const apiCacher = {
 					};
 				})(res.data);
 				return res;
+			})
+		;
+	},
+
+	loadBacktestDetails(id: string, fullResultsPath: string){
+		let url = `${getBacktestsUrl()}/${fullResultsPath}`;
+		return fetch( url )
+			.then( res => res.text() )
+			.then( encoded => {
+				let decoded = lzString.decompress(encoded);
+				reducer<string>( (store, str) => {
+					return {
+						...store,
+						backtests: {
+							...store.backtests,
+							[id]: {
+								...(store.backtests[id] || {} ),
+								fullResults: JSON.parse(decoded || '')
+							}
+						}
+					};
+				})
 			})
 		;
 	},

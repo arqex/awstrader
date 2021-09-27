@@ -6,7 +6,7 @@ type SelectorOutput<ARG,RET> = (arg: ARG) => RET;
 
 interface LoaderInput<ST,INP> {
 	selector: (store: ST, arg: INP) => any
-	load: (arg: INP) => Promise<any>
+	load: (arg: INP, store: ST) => Promise<any>
 	isValid?:( arg: INP ) => boolean
 }
 
@@ -62,7 +62,7 @@ export default function lorese<ST>( store: ST ): Lorese<ST>{
 			
 			function loadData(input: INP, cached: RET | void) {
 				const key = JSON.stringify(input);
-				let promise = config.load(input);
+				let promise = config.load(input, store);
 				loadCache.set(key, {
 					isLoading: true,
 					error: null,

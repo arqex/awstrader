@@ -1,0 +1,19 @@
+.container {
+	display: flex;
+	align-items: stretch;
+}
+
+.leftBar {
+	display: flex;
+	align-items: stretch;
+	overflow: hidden;
+	min-height: 0;
+	flex-shrink: 0;
+}
+
+.content {
+	display: flex;
+	flex-grow: 1;
+	overflow: hidden;
+	min-width: 0;
+}

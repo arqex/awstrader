@@ -13,12 +13,19 @@ import { isActiveDeployment } from '../../../../lambdas/_common/utils/deployment
 import { deploymentListLoader } from '../../state/loaders/deploymentList.loader';
 import { getAuthenticatedId } from '../../state/selectors/account.selectors';
 import { ModelBotDeployment } from '../../../../lambdas/model.types';
+import UpdateVersionForm from './UpdateVersionForm';
 
+interface DeploymentsScreenState {
+	loadingItems: {[id:string]: boolean},
+	createModalOpen: boolean,
+	updatingDeploymentVersion: false | ModelBotDeployment
+}
 
 export default class DeploymentsScreen extends React.Component<ScreenProps> {
 	state = {
 		loadingItems: {},
-		createModalOpen: false
+		createModalOpen: false,
+		updatingDeploymentVersion: false
 	}
 
 	render() {
@@ -32,6 +39,7 @@ export default class DeploymentsScreen extends React.Component<ScreenProps> {
 				<div>
 					{ this.renderDeployments() }
 					{ this.renderCreateModal() }
+					{ this.renderUpdateVersionModal() }
 				</div>
 			</ScreenWrapper>
 		);
@@ -86,6 +94,25 @@ export default class DeploymentsScreen extends React.Component<ScreenProps> {
 		)
 	}
 
+	renderUpdateVersionModal() {
+		const {updatingDeploymentVersion} = this.state;
+
+		return (
+			<Modal open={updatingDeploymentVersion}
+				onClose={() => this.setState({updatingDeploymentVersion: false})}>
+				{ () => (
+					<ModalBox>
+						<UpdateVersionForm
+							/* @ts-ignore */ 
+							deployment= {updatingDeploymentVersion}
+							onClose={() => this.setState({ updatingDeploymentVersion: false})}
+							onUpdateVersion={this._onUpdateVersion} />
+					</ModalBox>
+				)}
+			</Modal>
+		)
+	}
+
 	getColumns(): TableColumn<ModelBotDeployment>[] {
 		return [
 			{ field: 'id', renderFn: this._renderId },
@@ -117,6 +144,7 @@ export default class DeploymentsScreen extends React.Component<ScreenProps> {
 
 		const isActive = isActiveDeployment(item);
 		let buttons = [
+			{ label: 'Update bot version', value: 'updateVersion' },
 			{
 				label: isActive ? 'Deactivate' : 'Activate',
 				value: isActive ? 'deactivate' : 'activate'
@@ -128,18 +156,18 @@ export default class DeploymentsScreen extends React.Component<ScreenProps> {
 			<div onClick={(e:any) => e.stopPropagation()}>
 				<DropDownButton closeOnClick={true}>
 					<ButtonList buttons={buttons}
-						onButtonPress={(action: string) => this._onExchangeAction(item, action)}
+						onButtonPress={(action: string) => this._onDeploymentAction(item, action)}
 					/>
 				</DropDownButton>
 			</div>
 		);
 	}
 
-	_onExchangeAction = (item: ModelBotDeployment, action: string) => {
+	_onDeploymentAction = (item: ModelBotDeployment, action: string) => {
 		const {authenticatedId} = this.props;
 		if( action === 'activate' ){
 			this.setState({loadingItems: {[item.id]: true}});
-			apiCacher.updateDeployment( item.id, {active: true, accountId: authenticatedId})
+			apiCacher.updateDeployment( item.id, {active: true})
 				.then( () => {
 					this.setState({loadingItems: {}});
 				})
@@ -147,7 +175,7 @@ export default class DeploymentsScreen extends React.Component<ScreenProps> {
 		}
 		else if (action === 'deactivate') {
 			this.setState({ loadingItems: { [item.id]: true } });
-			apiCacher.updateDeployment(item.id, { active: false, accountId: authenticatedId })
+			apiCacher.updateDeployment(item.id, { active: false })
 				.then(() => {
 					this.setState({ loadingItems: {} });
 				})
@@ -160,6 +188,9 @@ export default class DeploymentsScreen extends React.Component<ScreenProps> {
 					this.setState({ loadingItems: {} });
 				})
 			;
+		}
+		else if (action === 'updateVersion') {
+			this.setState({updatingDeploymentVersion: item});
 		}
 	}
 
@@ -178,6 +209,14 @@ export default class DeploymentsScreen extends React.Component<ScreenProps> {
 		}
 
 		return this.createDeployment( data );
+	}
+
+	_onUpdateVersion = ( deploymentId: string, version: string) => {
+		return apiCacher.updateDeployment(deploymentId, {version})
+			.then( () => {
+				this.setState({updatingDeploymentVersion: false})
+			})
+		;
 	}
 
 	createDeployment(data: CreateDeploymentPayload) {
