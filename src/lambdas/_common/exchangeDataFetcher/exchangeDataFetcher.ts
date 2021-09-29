@@ -1,6 +1,7 @@
 import { ArrayCandle } from '../../lambda.types';
 import { DataFetcher } from './adapters/adapterTypes';
 import bitfinexAdapter from './adapters/bitfinexDataAdapter';
+import kucoinAdapter from './adapters/kucoinDataAdapter';
 
 interface ExchangeDataFetcherInput {
 	exchange: string
@@ -28,6 +29,8 @@ function getAdapter(exchange): DataFetcher | void {
 	switch(exchange) {
 		case 'bitfinex':
 			return bitfinexAdapter;
+		case 'kucoin':
+			return kucoinAdapter;
 		default:
 			console.error(`Unknown data adapter for exchange ${exchange}` );
 	}

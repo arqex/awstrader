@@ -112,8 +112,7 @@ export default class ExchangesScreen extends React.Component<ScreenProps> {
 			accountId: this.props.authenticatedId,
 			provider: exchange.provider,
 			type: 'real',
-			key: exchange.key,
-			secret: exchange.secret
+			credentials: exchange.credentials
 		};
 
 		return apiCacher.createExchangeAccount(payload)

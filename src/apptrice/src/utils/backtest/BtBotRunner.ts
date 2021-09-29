@@ -1,5 +1,5 @@
 import { BotCandles, Portfolio } from "../../../../lambdas/lambda.types";
-import { RunnableDeployment, DbExchangeAccount, DeploymentOrders, Order, PortfolioWithPrices, RunInterval } from "../../../../lambdas/model.types";
+import { RunnableDeployment, DbExchangeAccount, DeploymentOrders, Order, PortfolioWithPrices, RunInterval, ExchangeProvider } from "../../../../lambdas/model.types";
 import { BotRunner, BotRunnerDeploymentUpdate, BotRunnerExchangeUpdate } from "../../../../lambdas/_common/botRunner/BotRunner";
 import VirtualAdapter from "../../../../lambdas/_common/exchanges/adapters/VirtualAdapter";
 import { ExchangeAdapter, ExchangeOrder } from "../../../../lambdas/_common/exchanges/ExchangeAdapter";
@@ -21,7 +21,7 @@ export interface BtBotRunnerConfig {
 	balances: Balances,
 	fees: number,
 	slippage: number,
-	exchange: 'bitfinex'
+	exchange: ExchangeProvider
 }
 
 export interface BtVirtualExchangeAccount extends DbExchangeAccount {

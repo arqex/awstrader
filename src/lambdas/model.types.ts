@@ -237,10 +237,10 @@ export interface ConsoleEntry {
 
 
 // EXCHANGE ACCOUNT
-
+export type ExchangeProvider = 'bitfinex' | 'kucoin' | 'virtual'
 export interface BaseExchange {
 	name: string
-	provider: 'bitfinex'
+	provider: ExchangeProvider
 	createdAt: number
 	type: 'real' | 'virtual'
 	credentials?: {
@@ -256,8 +256,7 @@ export interface ModelExchange extends BaseExchange {
 export interface DbExchangeAccount extends TableItem {
 	id: string
 	name: string
-	provider: 'bitfinex'
-	createdAt: number
+	provider: ExchangeProvider
 	type: 'real' | 'virtual'
 	credentials?: {
 		[attr: string]: string

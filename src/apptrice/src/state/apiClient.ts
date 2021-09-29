@@ -23,8 +23,7 @@ export interface CreateExchangeAccountInput {
 	name: string,
 	provider: string,
 	type: 'real' | 'virtual',
-	key?: string,
-	secret?: string,
+	credentials?: any
 	initialBalances?: Portfolio
 }
 

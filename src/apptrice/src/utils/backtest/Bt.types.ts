@@ -1,6 +1,6 @@
 
 import { BotCandles } from "../../../../lambdas/lambda.types";
-import { ActiveInterval, BacktestConfig, ConsoleEntry, DBBotDeploymentState, DeploymentOrders, PortfolioHistoryItem, RunInterval, RunnableDeployment } from "../../../../lambdas/model.types";
+import { ActiveInterval, BacktestConfig, ConsoleEntry, DBBotDeploymentState, DeploymentOrders, ExchangeProvider, PortfolioHistoryItem, RunInterval, RunnableDeployment } from "../../../../lambdas/model.types";
 import { ScreenProps } from "../../types";
 
 export interface BtDeployment {
@@ -14,7 +14,7 @@ export interface BtDeployment {
 }
 
 export interface BtExchange {
-	provider: 'bitfinex'
+	provider: ExchangeProvider
 	fees: number
 	slippage: number
 }
@@ -42,7 +42,7 @@ export interface BtActive {
 export interface ActiveBtUpdate {
 	accountId?: string
 	botId?: string
-	provider?: 'bitfinex'
+	provider?: ExchangeProvider
 	startDate?: number
 	endDate?: number
 	deployment?: RunnableDeployment

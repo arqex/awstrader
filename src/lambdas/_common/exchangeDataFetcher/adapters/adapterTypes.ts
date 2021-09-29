@@ -1,11 +1,8 @@
 import { ArrayCandle } from "../../../lambda.types";
+import { CandleQuery } from "../../exchanges/ExchangeAdapter";
 
-export interface DataFetcherInput {
+export interface DataFetcherInput extends CandleQuery {
 	exchange: string
-	market: string
-	runInterval: '5m' | '10m' | '30m' | '1h' | '4h' | '1d'
-	lastCandleAt: number
-	candleCount: number
 }
 
 
