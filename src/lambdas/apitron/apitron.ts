@@ -133,8 +133,10 @@ async function setTestData() {
 			name: 'Test exchange real',
 			provider: 'bitfinex',
 			type: 'real',
-			key: 'Mma7B6ISTUNVcnUPOrDJgVgcNRh3VbmeIalaBDvUpml',
-			secret: 'U2FsdGVkX1824o9FgiOF9BxzhmGCFb8uif4cOgToOk1l0DLUFhT8Ua1pNmgbZU7odyYY4tdoA4s1c3XrM4tyxQ=='
+			credentials: {
+				key: 'Mma7B6ISTUNVcnUPOrDJgVgcNRh3VbmeIalaBDvUpml',
+				secret: 'U2FsdGVkX1824o9FgiOF9BxzhmGCFb8uif4cOgToOk1l0DLUFhT8Ua1pNmgbZU7odyYY4tdoA4s1c3XrM4tyxQ=='
+			}
 		});
 
 		await ExchangeAccountModel.create({
@@ -143,8 +145,7 @@ async function setTestData() {
 			name: 'Virtua exchange',
 			provider: 'bitfinex',
 			type: 'virtual',
-			key: '{"BTC": {"asset": "BTC", "free": 0, "total": 0}, "USD": {"asset": "USD", "free": 1000, "total": 1000}}',
-			secret: '{}'
+			initialBalances: {"BTC": {"asset": "BTC", "free": 0, "total": 0}, "USD": {"asset": "USD", "free": 1000, "total": 1000}}
 		});
 
 		await BotDeploymentModel.create({

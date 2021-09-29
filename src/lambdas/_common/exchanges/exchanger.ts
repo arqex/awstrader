@@ -25,18 +25,25 @@ const exchanger = {
 
 		if( exchangeAccount.type === 'real' ){
 			console.log('Real exchange!', exchangeAccount);
+			let credentials = {...exchangeAccount.credentials};
+			if( credentials.secret ){
+				credentials.secret = this.getDecodedSecret(exchangeAccount.accountId, credentials.secret);
+			}
+			if( credentials.passphrase ){
+				credentials.passphrase = this.getDecodedSecret(exchangeAccount.accountId, credentials.passphrase);
+			}
 			exchangeAccount = {
 				...exchangeAccount,
-				secret: this.getDecodedSecret(exchangeAccount)
+				credentials: {...credentials}
 			}
 		}
 
 		return new Adapter( exchangeAccount );
 	},
-	getDecodedSecret({secret, accountId}: DbExchangeAccount){
+	getDecodedSecret(accountId: string, secret: string){
 		return AES.decrypt(secret, accountId).toString(utf8Encode);
 	},
-	getEncodedSecret({secret, accountId}: DbExchangeAccount){
+	getEncodedSecret(accountId: string, secret: string){
 		return AES.encrypt(secret, accountId).toString();
 	}
 }

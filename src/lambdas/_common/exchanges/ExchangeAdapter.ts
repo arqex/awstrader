@@ -26,11 +26,6 @@ export interface ExchangeOrders {
 	[id: string]: ExchangeOrder
 }
 
-export interface ExchangeCredentials {
-	key: string
-	secret: string
-}
-
 export interface ExchangeVirtualData {
 	portfolio: string,
 	orders: string
@@ -62,10 +57,10 @@ export interface ExchangeAdapter {
 	getCandles(options: CandleQuery): Promise<ArrayCandle[]>
 	placeOrders(orders: OrderInput[]): Promise<ExchangeOrder[]>
 	cancelOrders(orderIds: string[]): Promise<boolean[]>
-	getOrders(ids: string[]): Promise<ExchangeOrder[]>
+	getOrders(ids: string[]): Promise<(ExchangeOrder|null)[]>
 	getOpenOrders(): Promise<ExchangeOrder[]>
 	getOrderHistory(): Promise<ExchangeOrder[]>
 	hydrate?: () => Promise<void>
-	getTicker: () => Promise<Ticker>
-	getPairs: () => Promise<ExchangePairs>
+	getTicker(): Promise<Ticker>
+	getPairs(): Promise<ExchangePairs>
 }

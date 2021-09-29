@@ -14,9 +14,11 @@ export default class BitfinexAdapter implements ExchangeAdapter {
 	bfx: RESTv2
 	constructor( exchangeAccount: DbExchangeAccount ){
 		console.log('Createing bfx', exchangeAccount);
+		// @ts-ignore
+		const {key, secret} = exchangeAccount.credentials;
 		this.bfx = new RESTv2({
-			apiKey: exchangeAccount.key,
-			apiSecret: exchangeAccount.secret
+			apiKey: key,
+			apiSecret: secret
 		});
 	}
 

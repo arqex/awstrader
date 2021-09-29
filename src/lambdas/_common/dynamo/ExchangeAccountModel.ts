@@ -61,7 +61,7 @@ export default {
 
 		// @ts-ignore
 		let exchange: DynamoExchange = {
-			...arrayize(account).filterKeys(['accountId', 'name', 'provider', 'type', 'key', 'secret']),
+			...arrayize(account).filterKeys(['accountId', 'name', 'provider', 'type', 'credentials']),
 			resourceId: `EXCHANGE#${exchangeId}`
 		};
 		

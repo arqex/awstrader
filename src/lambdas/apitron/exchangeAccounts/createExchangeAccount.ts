@@ -19,16 +19,22 @@ const createExchangeAccountHandler: MutationHandler = {
 	},
 
 	getMutations(input: MutationGetterInput): Mutation[] {
-		const {accountId, provider, type, key, secret, name, initialBalances} = input.body;
+		const {accountId, provider, type, credentials, name, initialBalances} = input.body;
 		let data = {
 			id: createId(),
 			createdAt: Date.now(),
-			accountId, provider, type, key, secret, name, initialBalances
+			accountId, provider, type, credentials, name, initialBalances
 		}
 
-		if( type === 'real' ){
-			data.secret = exchanger.getEncodedSecret(input.body);
-			console.log('SECRET', data.secret);
+		if( type === 'real' ) {
+			if( credentials.secret ){
+				credentials.secret = exchanger.getEncodedSecret(accountId, credentials.secret);
+				console.log('SECRET', credentials.secret);
+			}
+			if( credentials.passphrase ){
+				credentials.passphrase = exchanger.getEncodedSecret(accountId, credentials.passphrase);
+				console.log('PASSPHRASE', credentials.passphrase);
+			}
 		}
 
 		return [{
@@ -57,8 +63,7 @@ function getValidShape( type ){
 			accountId: 'string',
 			provider: 'provider',
 			type: 'providerType',
-			key: 'string',
-			secret: 'string'
+			credentials: 'map(string)'
 		};
 	}
 

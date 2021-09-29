@@ -87,7 +87,7 @@ export interface OrderInput {
 	type: 'limit' | 'market'
 	direction: 'buy' | 'sell'
 	amount: number
-	price: number | null
+	price?: number
 }
 
 export interface Order extends OrderInput {
@@ -95,7 +95,7 @@ export interface Order extends OrderInput {
 	foreignId: string | null
 	status: 'pending' | 'placed' | 'completed' | 'cancelled' | 'error'
 	errorReason: string | null
-	price: number | null
+	price?: number
 	executedPrice: number | null
 	marketPrice: number
 	createdAt: number

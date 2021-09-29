@@ -86,7 +86,7 @@ export interface DbBotVersion extends TableItem {
 
 // BOT DEPLOYMENT
 
-export type RunInterval = '5m' | '10m' | '30m' | '1h' | '4h' | '1d';
+export type RunInterval = '5m' | '30m' | '1h' | '4h' | '1d';
 
 export interface Order extends OrderInput {
 	id: string
@@ -243,8 +243,9 @@ export interface BaseExchange {
 	provider: 'bitfinex'
 	createdAt: number
 	type: 'real' | 'virtual'
-	key?: string
-	secret?: string
+	credentials?: {
+		[attr: string]: string
+	}
 }
 
 export interface DynamoExchange extends BaseExchange, TableItem {}
@@ -258,8 +259,9 @@ export interface DbExchangeAccount extends TableItem {
 	provider: 'bitfinex'
 	createdAt: number
 	type: 'real' | 'virtual'
-	key?: string
-	secret?: string
+	credentials?: {
+		[attr: string]: string
+	}
 }
 
 export interface PortfolioHistoryItem {
@@ -281,8 +283,9 @@ export interface CreateExchangeAccountInput {
 	name: string
 	provider: 'bitfinex'
 	type: 'real' | 'virtual'
-	key?: string
-	secret?: string
+	credentials?: {
+		[attr: string]: string
+	}
 	initialBalances: Portfolio
 }
 
@@ -292,8 +295,9 @@ export interface DynamoExchangeInput {
 	name: string
 	provider: 'bitfinex'
 	type: 'real' | 'virtual'
-	key?: string
-	secret?: string
+	credentials?: {
+		[attr: string]: string
+	}
 	initialBalances?: Portfolio
 }
 

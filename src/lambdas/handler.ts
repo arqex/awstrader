@@ -87,8 +87,10 @@ async function setTestData( event ) {
       exchangeAccountId: 'testExchange',
       provider: 'bitfinex',
       type: 'real',
-      key: 'Mma7B6ISTUNVcnUPOrDJgVgcNRh3VbmeIalaBDvUpml',
-      secret: 'ckm9hrkka000dyq349ngb2jro'
+      credentials: {
+        key: 'Mma7B6ISTUNVcnUPOrDJgVgcNRh3VbmeIalaBDvUpml',
+        secret: 'ckm9hrkka000dyq349ngb2jro'
+      }
     });
 
     await BotDeploymentModel.create({
