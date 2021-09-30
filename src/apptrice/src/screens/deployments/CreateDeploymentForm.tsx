@@ -239,6 +239,7 @@ export default class CreateDeploymentForm extends React.Component<CreateDeployme
 							value={ this.state.exchange }
 							onChange={ e => this.setState({exchange: e.target.value})}>
 							<option value="bitfinex">Bitfinex</option>
+							<option value="kucoin">Kucoin</option>
 						</select>
 					</InputGroup>
 				</div>

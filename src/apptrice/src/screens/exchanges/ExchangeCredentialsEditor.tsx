@@ -66,6 +66,7 @@ export default class ExchangeCredentialsEditor extends React.Component<ExchangeC
 				name="secret"
 				label="API secret">
 				<input name="secret"
+					type="password"
 					value={this.props.credentials.secret}
 					onChange={this._updateSecret} />
 			</InputGroup>
@@ -78,6 +79,7 @@ export default class ExchangeCredentialsEditor extends React.Component<ExchangeC
 				name="passphrase"
 				label="Key passphrase">
 				<input name="passphrase"
+					type="password"
 					value={this.props.credentials.passphrase || ''}
 					onChange={this._updatePassphrase} />
 			</InputGroup>

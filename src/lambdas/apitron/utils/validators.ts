@@ -110,7 +110,7 @@ const validators = {
 	runInterval: value => validIntervals[value] === true,
 	pairs: validatePairs,
 	boolean: value => typeof value === 'boolean',
-	provider: value => value === 'bitfinex',
+	provider: value => value === 'bitfinex' || value === 'kucoin',
 	providerType: value => value === 'real' || value === 'virtual',
 	portfolio: validatePortfolio,
 	pricesType: oneOf(['hourly', 'daily', 'weekly', 'monthly']),

@@ -33,7 +33,7 @@ export default class KucoinAdapter implements ExchangeAdapter {
 	}
 
 	getCandles(options: CandleQuery): Promise<ArrayCandle[]> {
-
+		console.log('Kucoin candles', options);
 		const pair = getExchangePair(options.market);
 		const timeInterval = getExchangeTimeInterval(options.runInterval);
 		const thresholds = {

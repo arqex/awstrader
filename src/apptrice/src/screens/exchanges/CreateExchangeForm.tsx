@@ -59,6 +59,7 @@ export default class CreateExchangeForm extends React.Component<CreateExchangeFo
 							value={this.state.provider}
 							onChange={e => this.setState({ provider: e.target.value })}>
 								<option value="bitfinex">Bitfinex</option>
+								<option value="kucoin">Kucoin</option>
 						</select>
 					</InputGroup>
 				</div>

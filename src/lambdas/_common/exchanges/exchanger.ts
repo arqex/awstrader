@@ -1,5 +1,6 @@
 import { DbExchangeAccount } from '../../model.types';
 import BitfinexAdapter from './adapters/BitfinexAdapter';
+import KucoinAdapter from './adapters/KucoinAdapter';
 import VirtualAdapter from './adapters/VirtualAdapter';
 import {ExchangeAdapter} from './ExchangeAdapter';
 
@@ -8,6 +9,7 @@ const utf8Encode = require("crypto-js/enc-utf8");
 
 const adapters = {
 	bitfinex: BitfinexAdapter,
+	kucoin: KucoinAdapter,
 	virtual: VirtualAdapter
 };
 

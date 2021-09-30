@@ -6,6 +6,7 @@ import pairs from "../../utils/pairs";
 import { CandleQuery, ExchangeAdapter, ExchangeOrder, ExchangeOrders, ExchangePairs, ExchangeVirtualData, Ticker } from "../ExchangeAdapter";
 import BitfinexAdapter from "./BitfinexAdapter";
 import { v4 as uuid } from 'uuid';
+import KucoinAdapter from "./KucoinAdapter";
 
 export interface ExchangeAccountData {
 	portfolio: Portfolio
@@ -55,10 +56,16 @@ export default class VirtualAdapter implements ExchangeAdapter {
 		return this.portfolio;
 	}
 
+	providerAdapters = {
+		bitfinex: BitfinexAdapter,
+		kucoin: KucoinAdapter
+	}
 	async getCandles(options: CandleQuery): Promise<ArrayCandle[]> {
-		// Key and secret doesn't matter, candles are public
-		let bfx = new BitfinexAdapter(this.exchangeAccount);
-		let data = await bfx.getCandles(options);
+		let MarketAdapter = this.providerAdapters[this.exchangeAccount.provider];
+
+		// @ts-ignore Key and secret doesn't matter, candles are public
+		let adapter = new MarketAdapter({credentials: {key: '', secret: '', passphrase: ''}});
+		let data = await adapter.getCandles(options);
 
 		this.updateCandlesData( options.market, data );
 		return data;
