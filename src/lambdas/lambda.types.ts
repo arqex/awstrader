@@ -1,4 +1,4 @@
-import { ConsoleEntry, DeploymentOrders } from "./model.types"
+import { ConsoleEntry, DeploymentOrders, Order } from "./model.types"
 import { Indicators } from "./_common/botRunner/botRunIndicators"
 import { Patterns } from "./_common/botRunner/botRunPatterns"
 import { PairPlottingSeries, Plotter } from "./_common/botRunner/botRunPlotter"
@@ -88,19 +88,6 @@ export interface OrderInput {
 	direction: 'buy' | 'sell'
 	amount: number
 	price?: number
-}
-
-export interface Order extends OrderInput {
-	id: string
-	foreignId: string | null
-	status: 'pending' | 'placed' | 'completed' | 'cancelled' | 'error'
-	errorReason: string | null
-	price?: number
-	executedPrice: number | null
-	marketPrice: number
-	createdAt: number
-	placedAt: number | null
-	closedAt: number | null
 }
 
 export interface Orders {

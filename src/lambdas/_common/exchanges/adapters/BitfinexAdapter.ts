@@ -3,7 +3,7 @@ import { RESTv2 } from 'bfx-api-node-rest';
 import { Order as BfxOrder } from 'bfx-api-node-models';
 import { CandleQuery, ExchangeAdapter, ExchangeOrder, ExchangePairs, Ticker } from '../ExchangeAdapter';
 import { ArrayCandle, OrderInput, Portfolio } from '../../../lambda.types';
-import { DbExchangeAccount } from '../../../model.types';
+import { ModelExchange } from '../../../model.types';
 
 const fetch = require('node-fetch');
 const baseUrl = 'https://api-pub.bitfinex.com/v2';
@@ -11,8 +11,9 @@ const baseUrl = 'https://api-pub.bitfinex.com/v2';
 let cache = {};
 
 export default class BitfinexAdapter implements ExchangeAdapter {
+	exchangeId = 'bitfinex'
 	bfx: RESTv2
-	constructor( exchangeAccount: DbExchangeAccount ){
+	constructor( exchangeAccount: ModelExchange ){
 		console.log('Createing bfx', exchangeAccount);
 		// @ts-ignore
 		const {key, secret} = exchangeAccount.credentials;
@@ -49,6 +50,7 @@ export default class BitfinexAdapter implements ExchangeAdapter {
 
 		console.log(`Request ${baseUrl}/${pathParams}?${queryParams}`);
 		const req = await fetch(`${baseUrl}/${pathParams}?${queryParams}`);
+		console.log(req);
 		const reversedCandles = await req.json();
 
 		candles = reversedCandles.reverse();

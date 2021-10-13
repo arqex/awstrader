@@ -1,6 +1,6 @@
 import { BacktestConfig } from "../../common/btSettings/BotTools";
 import {v4 as uuid} from 'uuid';
-import { DbExchangeAccount } from "../../../../lambdas/model.types";
+import { ModelExchange } from "../../../../lambdas/model.types";
 import BtBotRunner from "./BtBotRunner";
 import { runBotIteration } from "../../../../lambdas/_common/botRunner/runBotIteration";
 import { BtExchange } from "./Bt.types";
@@ -85,9 +85,7 @@ function setInitialBt(btid: string, version: StoreBotVersion, runner: BtBotRunne
 			versionNumber: version.number,
 			deployment: runner.deployment,
 			exchange: {
-				provider: runner.exchange.provider,
-				fees: runner.exchange.fees,
-				slippage: runner.exchange.slippage
+				provider: runner.exchange.provider
 			}
 		},
 		config
@@ -109,11 +107,9 @@ async function runIterations( version: StoreBotVersion, runner: BtBotRunner ) {
 	}
 }
 
-function toBtExchange( exchange: DbExchangeAccount ): BtExchange{
+function toBtExchange( exchange: ModelExchange ): BtExchange{
 	return {
-		provider: exchange.provider,
-		fees: exchange.fees,
-		slippage: exchange.slippage
+		provider: exchange.provider
 	};
 }
 

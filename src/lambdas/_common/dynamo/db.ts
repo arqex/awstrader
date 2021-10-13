@@ -16,11 +16,30 @@ interface GSIQuery {
 	sk: { name: string, value: string } // sort key
 }
 
+interface DBModelConfig {
+	pkName?: string,
+	skName?: string,
+	tableName?: string,
+}
+
+// @ts-ignore
+const ACCOUNTS_TABLE: string = process.env.ACCOUNTS_TABLE;
+
 export class DBModel<T> {
+	pkName: string
+	skName: string
+	tableName: string
+
+	constructor( config?: DBModelConfig ){
+		this.pkName = config?.pkName || 'accountId'
+		this.skName = config?.skName || 'resourceId'
+		this.tableName = config?.tableName || ACCOUNTS_TABLE;
+	}
+
 	async put(item: T ): Promise<void> {
 		try {
 			await dynamoDb.put({
-				TableName: process.env.ACCOUNTS_TABLE,
+				TableName: this.tableName,
 				Item: item
 			}).promise();
 		}
@@ -32,8 +51,11 @@ export class DBModel<T> {
 
 	async getSingle( accountId: string, resourceId: string ): Promise<T|void> {
 		const payload = {
-			TableName: process.env.ACCOUNTS_TABLE,
-			Key: { accountId, resourceId }
+			TableName: this.tableName,
+			Key: { 
+				[this.pkName]: accountId,
+				[this.skName]: resourceId
+			}
 		};
 		console.log( payload );
 		try {
@@ -49,8 +71,8 @@ export class DBModel<T> {
 	async getMultiple(accountId: string, resourcePrefix: string): Promise<T[]> {
 		try {
 			let res = await dynamoDb.query({
-				TableName: process.env.ACCOUNTS_TABLE,
-				KeyConditionExpression: 'accountId = :a and begins_with(resourceId, :r)',
+				TableName: this.tableName,
+				KeyConditionExpression: `${this.pkName} = :a and begins_with(${this.skName}, :r)`,
 				ExpressionAttributeValues: {
 					':a': accountId,
 					':r': resourcePrefix
@@ -71,8 +93,11 @@ export class DBModel<T> {
 		}
 		try {
 			await dynamoDb.update({
-				TableName: process.env.ACCOUNTS_TABLE,
-				Key: {accountId, resourceId},
+				TableName: this.tableName,
+				Key: { 
+					[this.pkName]: accountId,
+					[this.skName]: resourceId
+				},
 				AttributeUpdates
 			}).promise();
 		}
@@ -90,8 +115,11 @@ export class DBModel<T> {
 		
 		try {
 			await dynamoDb.update({
-				TableName: process.env.ACCOUNTS_TABLE,
-				Key: { accountId, resourceId },
+				TableName: this.tableName,
+				Key: { 
+					[this.pkName]: accountId,
+					[this.skName]: resourceId
+				},
 				AttributeUpdates
 			}).promise();
 		}
@@ -104,8 +132,11 @@ export class DBModel<T> {
 	async del( accountId: string, resourceId:string ): Promise<void> {
 		try {
 			await dynamoDb.delete({
-				TableName: process.env.ACCOUNTS_TABLE,
-				Key: { accountId, resourceId }
+				TableName: this.tableName,
+				Key: { 
+					[this.pkName]: accountId,
+					[this.skName]: resourceId
+				}
 			}).promise();
 		}
 		catch (err) {
@@ -115,10 +146,11 @@ export class DBModel<T> {
 	}
 
 	getIndex(indexName: string ){
+		let tableName = this.tableName;
 		return {
 			async getSingle(input: GSIQuery) {
 				const payload = {
-					TableName: process.env.ACCOUNTS_TABLE,
+					TableName: tableName,
 					IndexName: indexName,
 					Key: {
 						[input.pk.name]: input.pk.value,
@@ -140,7 +172,7 @@ export class DBModel<T> {
 
 				try {
 					let res = await dynamoDb.query({
-						TableName: process.env.ACCOUNTS_TABLE,
+						TableName: tableName,
 						IndexName: indexName,
 						KeyConditionExpression: `${input.pk.name} = :pk AND ${input.sk.name} = :sk`,
 						ExpressionAttributeValues: {

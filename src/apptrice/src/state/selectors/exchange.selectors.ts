@@ -1,17 +1,17 @@
 import memoizeOne from 'memoize-one';
-import { DbExchangeAccount } from '../../../../lambdas/model.types';
+import { ModelExchange } from '../../../../lambdas/model.types';
 import { selector, Store } from '../stateManager';
 import { getAccount, getAuthenticatedId } from './account.selectors';
 
-export function getExchangesSelector(store: Store, accountId: string): DbExchangeAccount[] | void{
+export function getExchangesSelector(store: Store, accountId: string): ModelExchange[] | void{
 	const account = getAccount(accountId);
 	if( !account || !account.exchangeAccounts ) return;
 
 	return getExchangesMemo( account.exchangeAccounts, store.exchangeAccounts );
 }
 
-export const getAccountExchanges = selector<string,DbExchangeAccount[]|void>( getExchangesSelector );
-export const getExchangeList = selector<string,DbExchangeAccount[]|void>( (store, accountId) => (
+export const getAccountExchanges = selector<string,ModelExchange[]|void>( getExchangesSelector );
+export const getExchangeList = selector<string,ModelExchange[]|void>( (store, accountId) => (
 	getExchangesSelector( store, getAuthenticatedId() )
 ));
 
@@ -22,4 +22,4 @@ const getExchangesMemo = memoizeOne( (ids, exchanges) => {
 export function exchangeSelector(store: Store, exchangeId: string) {
 	return store.exchangeAccounts[exchangeId];
 }
-export const getExchange = selector<string, DbExchangeAccount | void>( exchangeSelector );
+export const getExchange = selector<string, ModelExchange | void>( exchangeSelector );

@@ -53,6 +53,7 @@ export interface ExchangePair {
 }
 
 export interface ExchangeAdapter {
+	exchangeId: string
 	getPortfolio(): Promise<Portfolio>
 	getCandles(options: CandleQuery): Promise<ArrayCandle[]>
 	placeOrders(orders: OrderInput[]): Promise<ExchangeOrder[]>

@@ -1,5 +1,5 @@
 import { BotCandles, Portfolio } from "../../../../lambdas/lambda.types";
-import { RunnableDeployment, DbExchangeAccount, DeploymentOrders, Order, PortfolioWithPrices, RunInterval, ExchangeProvider } from "../../../../lambdas/model.types";
+import { RunnableDeployment, ModelExchange, DeploymentOrders, Order, PortfolioWithPrices, RunInterval, ExchangeProvider } from "../../../../lambdas/model.types";
 import { BotRunner, BotRunnerDeploymentUpdate, BotRunnerExchangeUpdate } from "../../../../lambdas/_common/botRunner/BotRunner";
 import VirtualAdapter from "../../../../lambdas/_common/exchanges/adapters/VirtualAdapter";
 import { ExchangeAdapter, ExchangeOrder } from "../../../../lambdas/_common/exchanges/ExchangeAdapter";
@@ -24,7 +24,7 @@ export interface BtBotRunnerConfig {
 	exchange: ExchangeProvider
 }
 
-export interface BtVirtualExchangeAccount extends DbExchangeAccount {
+export interface BtVirtualExchangeAccount extends ModelExchange {
 	fees: number,
 	slippage: number
 }
@@ -171,7 +171,7 @@ export default class BtBotRunner implements BotRunner {
 		return Promise.resolve(this.deployment);
 	}
 
-	updateExchange( exchange: DbExchangeAccount, update: BotRunnerExchangeUpdate ) {
+	updateExchange( exchange: ModelExchange, update: BotRunnerExchangeUpdate ) {
 		this.exchange = {
 			...this.exchange,
 			...update,

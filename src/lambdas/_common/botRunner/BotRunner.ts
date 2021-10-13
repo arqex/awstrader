@@ -1,5 +1,5 @@
-import { BotCandles, BotConfigurationExtra, BotExecutorResult, BotState, Portfolio, OrderInput, BotExecutorResultWithDate, Orders } from "../../../lambdas/lambda.types";
-import { ConsoleEntry, RunnableDeployment, DbExchangeAccount, DeploymentOrders, Order, PortfolioWithPrices, PlotterData } from "../../../lambdas/model.types";
+import { BotCandles, BotConfigurationExtra, BotState, Portfolio, BotExecutorResultWithDate } from "../../../lambdas/lambda.types";
+import { ConsoleEntry, RunnableDeployment, ModelExchange, DeploymentOrders, Order, PortfolioWithPrices, PlotterData } from "../../../lambdas/model.types";
 import { ExchangeAdapter, ExchangeOrder, ExchangeOrders } from "../../../lambdas/_common/exchanges/ExchangeAdapter";
 import { PairPlottingSeries } from "./botRunPlotter";
 
@@ -43,13 +43,13 @@ export interface BotRunnerExchangeUpdate {
 
 export interface BotRunner {
 	getDeployment( accountId: string, deploymentId: string ): Promise<RunnableDeployment>
-	getExchangeAccount( accountId: string, exchangeAccountId: string ): Promise<DbExchangeAccount>
+	getExchangeAccount( accountId: string, exchangeAccountId: string ): Promise<ModelExchange>
 	getExchangeOrders(adapter: ExchangeAdapter): ExchangeOrders | undefined
-	getAdapter( exchange: DbExchangeAccount ): Promise<ExchangeAdapter>
+	getAdapter( exchange: ModelExchange ): Promise<ExchangeAdapter>
 	getCandles( adapter: ExchangeAdapter, deployment: RunnableDeployment ): Promise<BotCandles>
 	getBot( accountId: string, botId: string, versionNumber: string ): Promise<RunnableBot>
 	updateDeployment( deployment: RunnableDeployment, update: BotRunnerDeploymentUpdate ): Promise<RunnableDeployment>,
-	updateExchange( exchange: DbExchangeAccount, update: BotRunnerExchangeUpdate): Promise<DbExchangeAccount>,
+	updateExchange( exchange: ModelExchange, update: BotRunnerExchangeUpdate): Promise<ModelExchange>,
 	setRunError( deployment: RunnableDeployment, error: any ): Promise<void>
 	cancelOrders( adapter: ExchangeAdapter, currentOrders: DeploymentOrders, ordersToCancel: string[] ): Promise<string[]>
 	placeOrders( adapter: ExchangeAdapter, ordersToPlace: Order[] ): Promise<ExchangeOrder[]>

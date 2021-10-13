@@ -25,6 +25,7 @@ export async function executor(event: BotExecutorPayload) {
 		return {error};
 	}
 
+	console.log('Creating Trader. CandleData:', Object.keys(event.candleData))
 	const trader = new Trader(
 		event.portfolio, event.orders, event.candleData
 	);

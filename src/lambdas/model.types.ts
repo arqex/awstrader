@@ -142,7 +142,7 @@ export interface BaseBotDeployment {
 	lastRunAt?: number
 	name: string
 
-	runInterval: string
+	runInterval: RunInterval
 	pairs: string[]
 
 	activeIntervals: ActiveInterval[]
@@ -195,7 +195,7 @@ export interface UpdateBotDeploymentModelInput {
 	orders?: DeploymentOrders
 	state?: DBBotDeploymentState
 	logs?: ConsoleEntry[]
-	portfolioHistory?: PortfolioWithPrices
+	portfolioHistory?: PortfolioHistoryItem[]
 	plotterData?: PlotterData
 }
 
@@ -210,7 +210,7 @@ export interface RunnableDeployment {
 	exchangeAccountId: string
 	botId: string
 	version: string
-	runInterval: string
+	runInterval: RunInterval
 	pairs: string[]
 	orders: DeploymentOrders
 	state: DBBotDeploymentState
@@ -253,15 +253,6 @@ export interface ModelExchange extends BaseExchange {
 	id: string
 	accountId: string
 }
-export interface DbExchangeAccount extends TableItem {
-	id: string
-	name: string
-	provider: ExchangeProvider
-	type: 'real' | 'virtual'
-	credentials?: {
-		[attr: string]: string
-	}
-}
 
 export interface PortfolioHistoryItem {
 	date: number
@@ -292,21 +283,12 @@ export interface DynamoExchangeInput {
 	accountId: string
 	id: string
 	name: string
-	provider: 'bitfinex'
+	provider: 'bitfinex' | 'kucoin'
 	type: 'real' | 'virtual'
 	credentials?: {
 		[attr: string]: string
 	}
 	initialBalances?: Portfolio
-}
-
-export interface ExchangeAccountResponse {
-	id: string
-	name: string
-	accountId: string
-	provider: string
-	type: string
-	key: string
 }
 
 // BACKTEST	

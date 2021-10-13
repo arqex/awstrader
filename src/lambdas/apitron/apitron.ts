@@ -14,10 +14,11 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as express from 'express';
 import * as serverless from 'serverless-http';
-import { DbExchangeAccount } from '../model.types';
+import { ModelExchange } from '../model.types';
 import BotVersionModel from '../_common/dynamo/BotVersionModel';
 import botVersionsAPI from './botVersions/botVersionsAPI';
 import backtestsAPI from './backtests/backtestsAPI';
+import setMarketTestEndpoint from '../_common/markets/marketServiceTester';
 
 const app = express()
 
@@ -60,6 +61,8 @@ deploymentAPI.initialize(app);
 exchangesAPI.initialize(app);
 pricesAPI.initialize(app);
 
+setMarketTestEndpoint(app);
+
 app.post('/runnow', function(req, res) {
 	const { accountId, deploymentId } = req.body;
 	if (!accountId) return returnMissingAttr(res, 'accountId');
@@ -90,7 +93,7 @@ app.get('/candles', async function(req,res) {
 	const { pair, runInterval, startDate, endDate, exchange = 'bitfinex' } = req.query;
 
 	// @ts-ignore
-	const dummyExchangeAccount: DbExchangeAccount = {key: 'candles', secret: 'candles'};
+	const dummyExchangeAccount: ModelExchange = {credentials: {key: 'candles', secret: 'candles'}};
 	const adapter = new BitfinexAdapter(dummyExchangeAccount);
 
 	// @ts-ignore
@@ -147,6 +150,19 @@ async function setTestData() {
 			type: 'virtual',
 			initialBalances: {"BTC": {"asset": "BTC", "free": 0, "total": 0}, "USD": {"asset": "USD", "free": 1000, "total": 1000}}
 		});
+
+		await ExchangeAccountModel.create({
+			accountId,
+			id: '5555555555555555555555',
+			name: 'Kucoin real',
+			provider: 'kucoin',
+			type: 'real',
+			credentials: {
+				key:"61605408f86ecb0001b6c8eb",
+				passphrase:"U2FsdGVkX1+J7wM0grWs8BxMHCHxcpKEy41lTNS8t9Qh9Src/l00V4S/2XQFoNEh",
+				secret:"U2FsdGVkX1+J4aKWT6Z/us/ao0Jqbg040AjBpCm0VwgdMVHh8nZZLu/nEaurT5ZNDzr77TCxoGsxeCEvuudn/Q=="
+			}
+		})
 
 		await BotDeploymentModel.create({
 			accountId,

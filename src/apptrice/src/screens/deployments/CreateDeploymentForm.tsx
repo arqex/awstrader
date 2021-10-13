@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DbBot, DbExchangeAccount } from '../../../../lambdas/model.types';
+import { DbBot, ModelExchange } from '../../../../lambdas/model.types';
 import InitialBalances, {Balances} from '../../common/btSettings/InitialBalances';
 import { Button, Controls, InputGroup } from '../../components';
 import Toaster from '../../components/toaster/Toaster';
@@ -201,10 +201,10 @@ export default class CreateDeploymentForm extends React.Component<CreateDeployme
 		);
 	}
 
-	renderExchangeSelector( exchanges: DbExchangeAccount[] ){
+	renderExchangeSelector( exchanges: ModelExchange[] ){
 		let options: any[] = [];
 
-		exchanges.forEach((exchange: DbExchangeAccount) => {
+		exchanges.forEach((exchange: ModelExchange) => {
 			if (exchange.type === 'real' ){
 				options.push(
 					<option key={exchange.id} value={exchange.id}>{exchange.name}</option>

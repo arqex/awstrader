@@ -1,5 +1,5 @@
 import { BotConfigurationExtra, BotExecutorResult, BotState, Portfolio } from "../../../../lambdas/lambda.types";
-import { ConsoleEntry, DbExchangeAccount, DeploymentOrders, Order, RunnableDeployment } from "../../../../lambdas/model.types";
+import { ConsoleEntry, DeploymentOrders, Order, RunnableDeployment } from "../../../../lambdas/model.types";
 import { BotRunInput } from "../../../../lambdas/_common/botRunner/BotRunner";
 import { ExchangeAdapter, ExchangeOrder } from "../../../../lambdas/_common/exchanges/ExchangeAdapter";
 

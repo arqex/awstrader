@@ -15,8 +15,6 @@ export interface BtDeployment {
 
 export interface BtExchange {
 	provider: ExchangeProvider
-	fees: number
-	slippage: number
 }
 
 export interface BtStored {

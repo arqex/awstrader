@@ -1,12 +1,11 @@
-import { DbExchangeAccount, ExchangeAccountResponse } from "../../../model.types";
+import { ModelExchange } from "../../../model.types";
 
-export default function toExchangeResponse( exchange: DbExchangeAccount ): ExchangeAccountResponse {
+export default function toExchangeResponse( exchange: ModelExchange ): ModelExchange {
+	let key = exchange.credentials?.key;
 	return {
-		id: exchange.id,
-		accountId: exchange.accountId,
-		name: exchange.name,
-		provider: exchange.provider,
-		type: exchange.type,
-		key: exchange.key ? exchange.key.slice(0, 5) + '...' : ''
+		...exchange,
+		credentials: {
+			key: key ? key.slice(0, 5) + '...' : ''
+		}
 	}
 }

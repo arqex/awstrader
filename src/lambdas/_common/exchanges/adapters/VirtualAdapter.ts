@@ -1,5 +1,5 @@
-import { Portfolio, ArrayCandle, Order, OrderInput, Balance, BotCandles } from "../../../lambda.types";
-import { DbExchangeAccount } from "../../../model.types";
+import { Portfolio, ArrayCandle, OrderInput, Balance } from "../../../lambda.types";
+import { ModelExchange, Order } from "../../../model.types";
 import ExchangeAccountModel from "../../dynamo/ExchangeAccountModel";
 import candles from "../../utils/candles";
 import pairs from "../../utils/pairs";
@@ -14,7 +14,9 @@ export interface ExchangeAccountData {
 }
 
 export default class VirtualAdapter implements ExchangeAdapter {
-	exchangeAccount: DbExchangeAccount
+	exchangeId = 'virtual'
+
+	exchangeAccount: ModelExchange
 	portfolio: Portfolio
 	orders: ExchangeOrders
 	openOrders: string[]
@@ -22,7 +24,7 @@ export default class VirtualAdapter implements ExchangeAdapter {
 	closeDate: number
 	lastCandles: {[pair: string]: ArrayCandle}
 
-	constructor(exchangeAccount: DbExchangeAccount) {
+	constructor(exchangeAccount: ModelExchange) {
 		this.exchangeAccount = exchangeAccount;
 		this.portfolio = {};
 		this.orders = {};
@@ -102,7 +104,7 @@ export default class VirtualAdapter implements ExchangeAdapter {
 				errorReason: 'not_enough_funds',
 				direction: order.direction,
 				amount: order.amount,
-				price: order.price,
+				price: order.price || null,
 				executedPrice: null,
 				placedAt: date,
 				closedAt: date
@@ -119,7 +121,7 @@ export default class VirtualAdapter implements ExchangeAdapter {
 			errorReason: null,
 			direction: order.direction,
 			amount: order.amount,
-			price: order.price,
+			price: order.price || null,
 			executedPrice: null,
 			placedAt: date,
 			closedAt: null

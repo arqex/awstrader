@@ -1,4 +1,4 @@
-import { DbBot, FullBotDeployment, DbExchangeAccount, ModelBotDeployment, ModelBacktest, RunnableDeployment } from '../../../lambdas/model.types';
+import { DbBot, FullBotDeployment, ModelExchange, ModelBotDeployment, ModelBacktest, RunnableDeployment } from '../../../lambdas/model.types';
 import { BtActive, BtExchange } from '../utils/backtest/Bt.types';
 import lorese from './Lorese';
 
@@ -47,7 +47,7 @@ export interface Store {
 		[id:string]: StoreBot
 	},
 	exchangeAccounts: {
-		[id:string]: DbExchangeAccount
+		[id:string]: ModelExchange
 	},
 	botVersions: {
 		[id:string]: StoreBotVersion

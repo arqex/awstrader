@@ -1,4 +1,4 @@
-import { DbExchangeAccount } from "../../../model.types";
+import { ModelExchange } from "../../../model.types";
 import { CandleQuery, ExchangeAdapter, ExchangeOrder, ExchangePairs, Ticker } from "../ExchangeAdapter";
 import * as KucoinClient from 'kucoin-node-sdk';
 import { ArrayCandle, OrderInput, Portfolio } from "../../../lambda.types";
@@ -8,7 +8,9 @@ import pairs from "../../utils/pairs";
 // console.log( KucoinClient );
 
 export default class KucoinAdapter implements ExchangeAdapter {
-	constructor( exchangeAccount: DbExchangeAccount, isSandbox?: boolean ){
+	exchangeId = 'kucoin'
+
+	constructor( exchangeAccount: ModelExchange, isSandbox?: boolean ){
 		KucoinClient.init({
 			baseUrl: isSandbox ? 'https://openapi-sandbox.kucoin.com' : 'https://api.kucoin.com',
 			apiAuth: exchangeAccount.credentials,
@@ -43,15 +45,15 @@ export default class KucoinAdapter implements ExchangeAdapter {
 		console.log('getting candles', pair, timeInterval, thresholds);
 		return KucoinClient.rest.Market.Histories.getMarketCandles( pair, timeInterval, thresholds)
 			.then( res => {
-				console.log( res )
+				return res.data.map( toArrayCandle );
 			})
 		;
 	}
 
 	placeOrders(orders: OrderInput[]): Promise<ExchangeOrder[]> {
-		let promises = orders.map( (order: OrderInput) => {
+		let promises = orders.map( (order: OrderInput, i: number) => {
 			const {baseParams, orderParams} = toKucoinOrderInput(order);
-			return KucoinClient.rest.Trade.Orders.postOrder(baseParams, orderParams);
+			return delayedOrderCreation( baseParams, orderParams, i);
 		});
 
 		console.log('Placing orders')
@@ -66,7 +68,7 @@ export default class KucoinAdapter implements ExchangeAdapter {
 			
 			console.log('Getting orders')
 			return Promise.all(orderPromises).then( results => {
-				console.log( results );
+				console.log( 'Placing order results', results );
 				let exchangeOrders = results.map( (res,i) => {
 					if( res.code !== '200000' ){
 						return toErrorOrder(orders[i], res.msg);
@@ -166,6 +168,18 @@ function getFirstCandleAt( lastCandleAt: number, candleCount: number, timeInterv
 	return lastCandleAt - (candleWidth*candleCount);
 }
 
+
+// We need the orders to have different nonces to be processed in order
+// set an artificial delay of 100ms to let the orders arrive in that order
+function delayedOrderCreation( baseParams, orderParams, i ){
+	return new Promise( (resolve) => {
+		let timeout = i * 100;
+		setTimeout( () => {
+			resolve( KucoinClient.rest.Trade.Orders.postOrder(baseParams, orderParams) );
+		}, timeout);
+	})
+}
+
 interface KucoinResponse {
 	code: string
 	data: any
@@ -244,6 +258,7 @@ function toExchangeOrder( order: KucoinOrder ): ExchangeOrder {
 		pair: getLocalExchangePair(order.symbol),
 		// @ts-ignore
 		type: order.type,
+		direction: order.side,
 		status: getOrderStatus(order),
 		errorReason: null,
 		amount: getOrderAmount( order ),
@@ -313,4 +328,16 @@ function getClosedAt(order: KucoinOrder): number | null {
 		return Date.now();
 	}
 	return order.createdAt;
+}
+
+
+function toArrayCandle( kucoinCandle: any ){
+	return [
+		parseInt(kucoinCandle[0]) * 1000,
+		parseFloat(kucoinCandle[1]),
+		parseFloat(kucoinCandle[2]),
+		parseFloat(kucoinCandle[3]),
+		parseFloat(kucoinCandle[4]),
+		parseFloat(kucoinCandle[5]),
+	];
 }

@@ -42,6 +42,7 @@ provider:
   lambdaHashingVersion: 20201221
   environment:
     ACCOUNTS_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    MARKETS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-markets
     STATE_BUCKET: ${self:custom.stateBucket}
     EXCHANGES_BUCKET: ${self:custom.exchangesBucket}
     BACKTESTS_BUCKET: ${self:custom.backtestsBucket}
@@ -157,6 +158,31 @@ resources:
         StreamSpecification:
           StreamViewType: "NEW_IMAGE"
         TableName: ${self:provider.environment.ACCOUNTS_TABLE}
+    
+    
+    MarketsDynamoTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: "exchangeId"
+            AttributeType: "S"
+          -
+            AttributeName: "symbolId"
+            AttributeType: "S"
+        KeySchema:
+          -
+            AttributeName: "exchangeId"
+            KeyType: "HASH"
+          -
+            AttributeName: "symbolId"
+            KeyType: "RANGE"
+                
+        BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: "NEW_IMAGE"
+        TableName: ${self:provider.environment.MARKETS_TABLE}
 
     # The default role to allow lambdas to write logs
     defaultRole:

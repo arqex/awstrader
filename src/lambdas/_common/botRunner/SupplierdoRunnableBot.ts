@@ -9,6 +9,8 @@ export class SupplierdoRunnableBot implements RunnableBot {
 	}
 
 	async run( input: BotRunInput ) {
+		console.log('Running bot', Object.keys(input));
+
 		return {
 			currentDate: Date.now(),
 			...( await lambdaUtil.invokeExecutor({

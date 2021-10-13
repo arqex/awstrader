@@ -1,8 +1,8 @@
-import { OrderInput, Order, Orders, Portfolio, BotCandles, Balance } from '../lambda.types';
+import { OrderInput, Orders, Portfolio, BotCandles, Balance } from '../lambda.types';
 import candles from '../_common/utils/candles';
 import pairs from '../_common/utils/pairs';
 import { v4 as uuid } from 'uuid';
-import { DeploymentOrders } from '../model.types';
+import { DeploymentOrders, Order } from '../model.types';
 export default class Trader {
 	portfolio: Portfolio
 	orders: Orders
@@ -46,6 +46,7 @@ export default class Trader {
 	placeOrder(orderInput: OrderInput): Order {
 		let order: Order = {
 			...orderInput,
+			price: orderInput.price || null,
 			id: uuid(),
 			status: 'pending',
 			foreignId: null,
@@ -88,6 +89,7 @@ export default class Trader {
 	}
 
 	getPrice(pair: string): number {
+		console.log('PRICEs', this.prices);
 		return this.prices[pair];
 	}
 }

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Balance } from '../../../../../../lambdas/lambda.types';
-import { DbExchangeAccount, PortfolioHistoryItem } from '../../../../../../lambdas/model.types';
+import { PortfolioHistoryItem } from '../../../../../../lambdas/model.types';
 import { getDeploymentAssets } from '../../../../../../lambdas/_common/utils/deploymentUtils';
 import { Card, Table } from '../../../../components';
 import priceLoader from '../../../../state/loadersOld/price.loader';

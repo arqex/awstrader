@@ -1,12 +1,12 @@
-import { DbExchangeAccount, DeploymentOrders, PortfolioWithPrices, RunnableDeployment } from "../../../lambdas/model.types";
-import { Balance, BotCandles, BotExecutorResultWithDate, Order, Portfolio } from "../../lambda.types";
+import { DeploymentOrders, ModelExchange, PortfolioWithPrices, RunnableDeployment, Order } from "../../../lambdas/model.types";
+import { Balance, BotCandles, BotExecutorResultWithDate, Portfolio } from "../../lambda.types";
 import { ExchangeAdapter, ExchangeOrder } from "../../../lambdas/_common/exchanges/ExchangeAdapter";
 import { BotRunner, RunnableBot } from './BotRunner';
 import candles from "../utils/candles";
 
 export async function runBotIteration( accountId: string, deploymentId: string, runner: BotRunner ){
 	let deployment: RunnableDeployment = await runner.getDeployment( accountId, deploymentId );
-	let exchange: DbExchangeAccount = await runner.getExchangeAccount( accountId, deployment.exchangeAccountId );
+	let exchange: ModelExchange = await runner.getExchangeAccount( accountId, deployment.exchangeAccountId );
 	let adapter: ExchangeAdapter = await runner.getAdapter( exchange );
 	let bot: RunnableBot = await runner.getBot( accountId, deployment.botId, deployment.version );
 
@@ -19,6 +19,9 @@ export async function runBotIteration( accountId: string, deploymentId: string, 
 	// Update the closed orders in the last iteration
 	let orders = await getUpdatedOrdersFromExchange( adapter, deployment.orders );
 	deployment = await runner.updateDeployment( deployment, {orders} );
+
+
+	// console.log('CandleData fetched:', candleData)
 	
 	const result = await bot.run({
 		candleData,

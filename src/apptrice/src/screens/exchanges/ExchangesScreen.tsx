@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ExchangeAccountResponse } from '../../../../lambdas/model.types';
+import { ModelExchange } from '../../../../lambdas/model.types';
 import { Button, ButtonList, DropDownButton, Modal, ModalBox, ScreenWrapper, Spinner, Table } from '../../components';
 import { TableColumn } from '../../components/table/Table';
 import Toaster from '../../components/toaster/Toaster';
@@ -63,7 +63,7 @@ export default class ExchangesScreen extends React.Component<ScreenProps> {
 		);
 	}
 
-	getColumns(): TableColumn<ExchangeAccountResponse>[] {
+	getColumns(): TableColumn<ModelExchange>[] {
 		return [
 			{field: 'id'},
 			{field: 'name'},
@@ -73,7 +73,7 @@ export default class ExchangesScreen extends React.Component<ScreenProps> {
 		];
 	}
 
-	_renderControls = (item: ExchangeAccountResponse) => {
+	_renderControls = (item: ModelExchange) => {
 
 		if( this.state.loadingItems[item.id] ){
 			return <Spinner color="#fff" />;
@@ -92,7 +92,7 @@ export default class ExchangesScreen extends React.Component<ScreenProps> {
 		);
 	}
 
-	_onExchangeAction = (item: ExchangeAccountResponse, action: string) => {
+	_onExchangeAction = (item: ModelExchange, action: string) => {
 		if( action === 'delete' ){
 			this.setState({loadingItems: {[item.id]: true}});
 			apiCacher.deleteExchangeAccount(this.props.authenticatedId, item.id)
