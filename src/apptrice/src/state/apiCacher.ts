@@ -23,7 +23,7 @@ const apiCacher = {
 		const {fullResults, ...baseBt} = input;
 		const payload = {
 			...baseBt,
-			fullResults: lzString.compress(fullResults)
+			fullResults: lzString.compressToUTF16(fullResults)
 		};
 		return apiClient.createBacktest(payload)
 			.then( res => {
@@ -86,24 +86,11 @@ const apiCacher = {
 		;
 	},
 
-	loadBacktestDetails(id: string, fullResultsPath: string){
-		let url = `${getBacktestsUrl()}/${fullResultsPath}`;
-		return fetch( url )
-			.then( res => res.text() )
-			.then( encoded => {
-				let decoded = lzString.decompress(encoded);
-				reducer<string>( (store, str) => {
-					return {
-						...store,
-						backtests: {
-							...store.backtests,
-							[id]: {
-								...(store.backtests[id] || {} ),
-								fullResults: JSON.parse(decoded || '')
-							}
-						}
-					};
-				})
+	loadBacktestDetails(id: string): Promise<any> {
+		return apiClient.loadBacktestDetails(id)
+			.then( (res:any) => {
+				console.log( lzString.decompressFromUTF16(res.data) );
+				return res;
 			})
 		;
 	},

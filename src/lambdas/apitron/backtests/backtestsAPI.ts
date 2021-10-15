@@ -1,5 +1,6 @@
 import { mutationHandler, queryHandler } from "../utils/RequestHandler";
 import createBacktestHandler from "./createBacktest";
+import getBacktestDataHandler from "./getBacktestData";
 import getBotBacktestsHandler from "./getBotBacktests";
 
 const backtestsAPI = {
@@ -11,6 +12,10 @@ const backtestsAPI = {
 		app.get('/bots/:botId/backtests', function(req, res) {
 			return queryHandler( req, res, getBotBacktestsHandler );
 		});
+
+		app.get('/backtests/:backtestId/details', function(req,res) {
+			return queryHandler( req, res, getBacktestDataHandler);
+		})
 	}
 }
 

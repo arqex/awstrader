@@ -7,8 +7,7 @@ import { BtExchange } from "./Bt.types";
 import { StoreBotVersion } from "../../state/stateManager";
 import { getActiveBt } from "../../state/selectors/bt.selectors";
 import { BtUpdater } from "../../state/updaters/bt.updater";
-import apiCacher from "../../state/apiCacher";
-import { getStats } from '../../common/deplotymentStats/statsCalculator';
+import { consolidateBacktest } from "./BtConsolidator";
 
 let runner: BtBotRunner;
 const BtRunner = {
@@ -67,7 +66,9 @@ async function prepareAndRun(btid: string, version: StoreBotVersion, options: Ba
 
 	BtUpdater.update({ status: 'completed' });
 
-	consolidateBacktest();
+	consolidateBacktest(getActiveBt())
+		.then( () => BtUpdater.clear() )
+	;
 
 	runner.bot?.terminate();
 }
@@ -111,27 +112,4 @@ function toBtExchange( exchange: ModelExchange ): BtExchange{
 	return {
 		provider: exchange.provider
 	};
-}
-
-function consolidateBacktest(){
-	let activeBt = getActiveBt();
-	if( !activeBt ) return;
-
-	console.log('Consolidating BT', activeBt);
-	const {accountId, botId, versionNumber, deployment, exchange} = activeBt.data;
-	const {netProfitPercent, maxDropdownPercent, exposurePercent} = getStats(deployment);
-	let bt = {
-		accountId,
-		botId,
-		versionNumber,
-		config: activeBt.config,
-		quickResults: {
-			netProfitPercent, maxDropdownPercent, exposurePercent
-		},
-		fullResults: JSON.stringify({deployment, exchange})
-	}
-
-	apiCacher.createBacktest(bt)
-		.then( () => BtUpdater.clear() )
-	;
 }

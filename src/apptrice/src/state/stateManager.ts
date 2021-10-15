@@ -1,4 +1,4 @@
-import { DbBot, FullBotDeployment, ModelExchange, ModelBotDeployment, ModelBacktest, RunnableDeployment } from '../../../lambdas/model.types';
+import { DbBot, FullBotDeployment, ModelExchange, ModelBotDeployment, ModelBacktest, RunnableDeployment, RunInterval, PortfolioHistoryItem, ActiveInterval, DeploymentOrders, DBBotDeploymentState, ConsoleEntry, PlotterData } from '../../../lambdas/model.types';
 import { BtActive, BtExchange } from '../utils/backtest/Bt.types';
 import lorese from './Lorese';
 
@@ -24,10 +24,29 @@ export interface StoreBot extends DbBot {
 	backtests?: string[]
 }
 
+export interface BtLightDeployment {
+	accountId: string
+	exchangeAccountId: string
+	botId: string
+	version: string
+	runInterval: RunInterval
+	pairs: string[]
+	portfolioHistory: PortfolioHistoryItem[]
+	activeIntervals: ActiveInterval[]
+	lastRunAt?: number
+}
+export interface BtDeploymentDetails {
+	orders: DeploymentOrders
+	state: DBBotDeploymentState
+	logs: ConsoleEntry[]
+	plotterData: PlotterData
+}
+
 export interface StoreBacktest extends ModelBacktest {
 	fullResults? : {
 		exchange: BtExchange,
-		deployment: RunnableDeployment
+		lightDeployment: BtLightDeployment,
+		deploymentDetails: BtDeploymentDetails | null
 	}
 }
 

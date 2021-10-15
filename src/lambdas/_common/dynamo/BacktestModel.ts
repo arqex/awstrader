@@ -36,6 +36,10 @@ export default {
 			Db.del(accountId, getResourceId(parentId, resourceId) ),
 			delResults( backtest.fullResultsPath )
 		])
+	},
+
+	async getFullResults(path: string){
+		return s3Helper.backtests.getContent(path);
 	}
 }
 

@@ -99,6 +99,15 @@ const apiClient = {
 		;
 	},
 
+	loadBacktestDetails(id: string) {
+		return axios.get(`${API_URL}/backtests/${id}/details`)
+			.then( res => {
+				console.log(res);
+				return res;
+			})
+		;
+	},
+
 	//////////
 	// BOTS
 	//////////
