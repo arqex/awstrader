@@ -1,37 +1,9 @@
-import apiCacher from "../../state/apiCacher";
-import { getStats } from '../../common/deplotymentStats/statsCalculator';
-import { BtActive } from "./Bt.types";
-
-// The problem sending backtests to lambda is that the payload
-// is too big. So we will send only the main data to the server
-// and store the rest locally
-export function consolidateBacktest(activeBt: BtActive ) {
-	console.log('Consolidating BT', activeBt);
-	const {accountId, botId, versionNumber, deployment, exchange} = activeBt.data;
-	const {netProfitPercent, maxDropdownPercent, exposurePercent} = getStats(deployment);
-	const {orders,logs,state,plotterData, ...lightDeployment} = deployment;
-
-
-	let bt = {
-		accountId,
-		botId,
-		versionNumber,
-		config: activeBt.config,
-		quickResults: {
-			netProfitPercent, maxDropdownPercent, exposurePercent
-		},
-		fullResults: JSON.stringify({lightDeployment, exchange})
-	}
-
-	return apiCacher.createBacktest(bt)
-		.then( res => {
-			saveBtLocal( res.data.id, {orders,logs,state,plotterData});
-		});
-}
+import { BtDeploymentDetails } from "../../state/stateManager";
+import lzString from 'lz-string';
 
 const LS_INDEX_KEY = "BT_INDEX";
 const LS_DATA_PREFIX = "BT_";
-export function saveBtLocal( btId: string, data: any ){
+export function saveBtLocal( btId: string, data: BtDeploymentDetails ) {
 	syncLocalBts();
 	let index:any = getIndex();
 	index[btId] = Date.now();
@@ -39,9 +11,11 @@ export function saveBtLocal( btId: string, data: any ){
 	saveBtData(btId, data);
 }
 
-export function getBtLocal( btId: string ){
+export function getBtLocal( btId: string ): BtDeploymentDetails | null{
 	syncLocalBts();
-	return localStorage.getItem(`${LS_DATA_PREFIX}${btId}`);
+	let datastr = localStorage.getItem(`${LS_DATA_PREFIX}${btId}`);
+	let decompress = datastr && lzString.decompress(JSON.parse(datastr))
+	return decompress ? JSON.parse(decompress) : null;
 }
 
 const BT_DATA_EXPIRATION = 15 * 24 * 60 * 60 * 1000; // 15days
@@ -66,5 +40,8 @@ function saveIndex(index: any){
 }
 
 function saveBtData(id: string, data: any) {
-	localStorage.setItem(`${LS_DATA_PREFIX}${id}`, JSON.stringify(data));
+	localStorage.setItem(
+		`${LS_DATA_PREFIX}${id}`,
+		lzString.compress(JSON.stringify(data))
+	);
 }

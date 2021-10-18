@@ -3,11 +3,12 @@ import {v4 as uuid} from 'uuid';
 import { ModelExchange } from "../../../../lambdas/model.types";
 import BtBotRunner from "./BtBotRunner";
 import { runBotIteration } from "../../../../lambdas/_common/botRunner/runBotIteration";
-import { BtExchange } from "./Bt.types";
-import { StoreBotVersion } from "../../state/stateManager";
+import { BtActive, BtExchange } from "./Bt.types";
+import { CreateBacktestInput, StoreBotVersion } from "../../state/stateManager";
 import { getActiveBt } from "../../state/selectors/bt.selectors";
 import { BtUpdater } from "../../state/updaters/bt.updater";
-import { consolidateBacktest } from "./BtConsolidator";
+import apiCacher from "../../state/apiCacher";
+import { getStats } from "../../common/deplotymentStats/statsCalculator";
 
 let runner: BtBotRunner;
 const BtRunner = {
@@ -66,9 +67,12 @@ async function prepareAndRun(btid: string, version: StoreBotVersion, options: Ba
 
 	BtUpdater.update({ status: 'completed' });
 
-	consolidateBacktest(getActiveBt())
-		.then( () => BtUpdater.clear() )
-	;
+	let activeBt = getActiveBt();
+	if( activeBt ){
+		apiCacher.createBacktest( toStoreBt(activeBt) )
+			.then( () => BtUpdater.clear() )
+		;
+	}
 
 	runner.bot?.terminate();
 }
@@ -112,4 +116,27 @@ function toBtExchange( exchange: ModelExchange ): BtExchange{
 	return {
 		provider: exchange.provider
 	};
+}
+
+function toStoreBt( bt: BtActive ): CreateBacktestInput {
+	const {accountId, botId, versionNumber, deployment, exchange} = bt.data;
+	const {netProfitPercent, maxDropdownPercent, exposurePercent} = getStats(deployment);
+	const {orders,logs,state,plotterData, ...lightDeployment} = deployment;
+
+	return {
+		accountId,
+		botId,
+		versionNumber,
+		config: bt.config,
+		quickResults: {
+			netProfitPercent, maxDropdownPercent, exposurePercent
+		},
+		fullResults: {
+			lightDeployment,
+			exchange,
+			deploymentDetails: {
+				orders,logs,state,plotterData
+			}
+		}
+	}
 }

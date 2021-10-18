@@ -1,4 +1,4 @@
-import { DbBot, FullBotDeployment, ModelExchange, ModelBotDeployment, ModelBacktest, RunnableDeployment, RunInterval, PortfolioHistoryItem, ActiveInterval, DeploymentOrders, DBBotDeploymentState, ConsoleEntry, PlotterData } from '../../../lambdas/model.types';
+import { DbBot, FullBotDeployment, ModelExchange, ModelBotDeployment, ModelBacktest, RunnableDeployment, RunInterval, PortfolioHistoryItem, ActiveInterval, DeploymentOrders, DBBotDeploymentState, ConsoleEntry, PlotterData, QuickBacktestResults, BacktestConfig } from '../../../lambdas/model.types';
 import { BtActive, BtExchange } from '../utils/backtest/Bt.types';
 import lorese from './Lorese';
 
@@ -42,12 +42,14 @@ export interface BtDeploymentDetails {
 	plotterData: PlotterData
 }
 
+export interface ModelBacktestFullResults {
+	exchange: BtExchange,
+	lightDeployment: BtLightDeployment,
+	deploymentDetails: BtDeploymentDetails | null
+}
+
 export interface StoreBacktest extends ModelBacktest {
-	fullResults? : {
-		exchange: BtExchange,
-		lightDeployment: BtLightDeployment,
-		deploymentDetails: BtDeploymentDetails | null
-	}
+	fullResults? : ModelBacktestFullResults
 }
 
 export type StoreBotDeployment = ModelBotDeployment | FullBotDeployment;
@@ -75,6 +77,15 @@ export interface Store {
 		activeBt?: BtActive,
 		candles: any
 	}
+}
+
+export interface CreateBacktestInput {
+	accountId: string,
+	botId: string,
+	versionNumber: string,
+	config: BacktestConfig,
+	quickResults: QuickBacktestResults,
+	fullResults: ModelBacktestFullResults
 }
 
 const manager = lorese<Store>({

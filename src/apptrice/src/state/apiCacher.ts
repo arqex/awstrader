@@ -1,12 +1,12 @@
 import { AxiosResponse } from 'axios';
 import { getActivatedDeployment, getDeactivatedDeployment } from '../../../lambdas/_common/utils/deploymentUtils';
 import apiClient, { CandleOptions, CreateExchangeAccountInput, UpdateBotInput, UpdateDeploymentInput, CreateDeploymentInput, CreateBotInput, CreateBotVersionInput, UpdateBotVersionInput } from './apiClient';
-import {reducer, Store} from './stateManager';
-import { CreateBacktestInput, CreateBacktestRequestPayload, DbBot, ModelBacktest, VersionHistory } from '../../../lambdas/model.types';
+import {CreateBacktestInput, ModelBacktestFullResults, reducer} from './stateManager';
+import { DbBot, ModelBacktest, VersionHistory } from '../../../lambdas/model.types';
 import { getCandlesKey, getVersionKey } from './storeKeys';
 import { parseTripleId } from '../../../lambdas/_common/utils/resourceId';
-import { getBacktestsUrl } from './selectors/environment.selectors';
 import lzString from 'lz-string';
+import { getBtLocal, saveBtLocal } from '../utils/backtest/BtConsolidator';
 
 const apiCacher = {
 	///////////
@@ -19,14 +19,26 @@ const apiCacher = {
 	////////////
 	// BACKTESTS
 	////////////
-	createBacktest(input: CreateBacktestRequestPayload ){
+	createBacktest(input: CreateBacktestInput ){
+		// The problem sending backtests to lambda is that the payload
+		// is too big. So we will send only the main data to the server
+		// and store the rest locally
 		const {fullResults, ...baseBt} = input;
+		const {exchange, lightDeployment, deploymentDetails} = fullResults;
+
 		const payload = {
 			...baseBt,
-			fullResults: lzString.compressToUTF16(fullResults)
+			fullResults: lzString.compressToUTF16(JSON.stringify({
+				exchange,
+				lightDeployment
+			}))
 		};
 		return apiClient.createBacktest(payload)
 			.then( res => {
+				if( deploymentDetails ){
+					saveBtLocal(res.data.id, deploymentDetails);
+				}
+
 				reducer<string>( (store, id) => {
 					const bot = {...store.bots[input.botId]};
 					const {accountId, parentId, resourceId} = parseTripleId(id);
@@ -89,6 +101,27 @@ const apiCacher = {
 	loadBacktestDetails(id: string): Promise<any> {
 		return apiClient.loadBacktestDetails(id)
 			.then( (res:any) => {
+				reducer<string>( (store, encoded) => {
+					let serverResults: ModelBacktestFullResults = JSON.parse(
+						// @ts-ignore
+						lzString.decompressFromUTF16(encoded)
+					);
+
+					console.log( serverResults );
+					return {
+						...store,
+						backtests: {
+							...store.backtests,
+							[id]: {
+								...store.backtests[id],
+								fullResults: {
+									...serverResults,
+									deploymentDetails: getBtLocal(id)
+								}
+							}
+						}
+					}
+				})(res.data);
 				console.log( lzString.decompressFromUTF16(res.data) );
 				return res;
 			})
