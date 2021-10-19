@@ -120,7 +120,8 @@ function toBtExchange( exchange: ModelExchange ): BtExchange{
 
 function toStoreBt( bt: BtActive ): CreateBacktestInput {
 	const {accountId, botId, versionNumber, deployment, exchange} = bt.data;
-	const {netProfitPercent, maxDropdownPercent, exposurePercent} = getStats(deployment);
+	const stats = getStats(deployment);
+	const {netProfitPercent, maxDropdownPercent, exposurePercent} = stats;
 	const {orders,logs,state,plotterData, ...lightDeployment} = deployment;
 
 	return {
@@ -134,6 +135,7 @@ function toStoreBt( bt: BtActive ): CreateBacktestInput {
 		fullResults: {
 			lightDeployment,
 			exchange,
+			stats,
 			deploymentDetails: {
 				orders,logs,state,plotterData
 			}

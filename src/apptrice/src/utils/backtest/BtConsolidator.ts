@@ -14,7 +14,7 @@ export function saveBtLocal( btId: string, data: BtDeploymentDetails ) {
 export function getBtLocal( btId: string ): BtDeploymentDetails | null{
 	syncLocalBts();
 	let datastr = localStorage.getItem(`${LS_DATA_PREFIX}${btId}`);
-	let decompress = datastr && lzString.decompress(JSON.parse(datastr))
+	let decompress = datastr && lzString.decompress(datastr);
 	return decompress ? JSON.parse(decompress) : null;
 }
 

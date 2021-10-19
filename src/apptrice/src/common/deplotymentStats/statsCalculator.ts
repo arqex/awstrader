@@ -7,7 +7,20 @@ export interface DeploymentStats {
 	netProfitPercent: number
 }
 
-export function getStats( deployment: RunnableDeployment ){
+export interface FullStats {
+	initialValue: number,
+	finalValue: number,
+	netProfitPercent: number,
+	maxDropdownPercent: number,
+	maxValue: number,
+	minValue: number,
+	exposurePercent: number,
+	openOrdersCount: number,
+	errorOrdersCount: number,
+	cancelledOrdersCount: number
+}
+
+export function getStats( deployment: RunnableDeployment ): FullStats {
 	return calculateStatsMemo(deployment);
 }
 

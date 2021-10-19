@@ -22,7 +22,7 @@ export default class BacktestsScreen extends React.Component<BotScreenProps> {
 						backtests={backtests}
 						onBtClicked={this._onBtClicked}
 						onBtSelected={this._onBtSelected}
-						activeBts={{}} />
+						activeBts={this.getActiveBts()} />
 				</div>
 				<div className={styles.content}>
 					{ this.renderContent() }
@@ -55,5 +55,22 @@ export default class BacktestsScreen extends React.Component<BotScreenProps> {
 
 	_onBtSelected = (bt: ModelBacktest) => {
 
+	}
+
+	getActiveBts() {
+		const {params, query} = this.props.router.location;
+		if( params.btid ){
+			return {[params.btid]: true};
+		}
+		if( query.compare ){
+			let activeBts:any = {};
+			query.compare.split(',').forEach( (id:string) => {
+				activeBts[id] = true;
+			});
+			return activeBts;
+		}
+
+		console.log( this.props.router.location.params );
+		return {};
 	}
 }

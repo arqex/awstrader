@@ -24,12 +24,13 @@ const apiCacher = {
 		// is too big. So we will send only the main data to the server
 		// and store the rest locally
 		const {fullResults, ...baseBt} = input;
-		const {exchange, lightDeployment, deploymentDetails} = fullResults;
+		const {exchange, lightDeployment, stats, deploymentDetails} = fullResults;
 
 		const payload = {
 			...baseBt,
 			fullResults: lzString.compressToUTF16(JSON.stringify({
 				exchange,
+				stats,
 				lightDeployment
 			}))
 		};

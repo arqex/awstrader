@@ -1,4 +1,5 @@
 import { DbBot, FullBotDeployment, ModelExchange, ModelBotDeployment, ModelBacktest, RunnableDeployment, RunInterval, PortfolioHistoryItem, ActiveInterval, DeploymentOrders, DBBotDeploymentState, ConsoleEntry, PlotterData, QuickBacktestResults, BacktestConfig } from '../../../lambdas/model.types';
+import { FullStats } from '../common/deplotymentStats/statsCalculator';
 import { BtActive, BtExchange } from '../utils/backtest/Bt.types';
 import lorese from './Lorese';
 
@@ -45,6 +46,7 @@ export interface BtDeploymentDetails {
 export interface ModelBacktestFullResults {
 	exchange: BtExchange,
 	lightDeployment: BtLightDeployment,
+	stats: FullStats,
 	deploymentDetails: BtDeploymentDetails | null
 }
 

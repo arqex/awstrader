@@ -3,6 +3,7 @@ import { ModelBacktest } from '../../../../../../lambdas/model.types';
 import styles from './_BacktestListItem.module.css';
 import {formatDistance} from 'date-fns';
 import trim from '../../../../utils/trim';
+import mergeStyles from '../../../../utils/mergeStyles';
 
 interface BacktestListItemProps {
 	backtest: ModelBacktest,
@@ -13,13 +14,18 @@ interface BacktestListItemProps {
 
 export default class BacktestListItem extends React.Component<BacktestListItemProps> {
 	render() {
-		const {backtest} = this.props;
+		const {backtest, isActive} = this.props;
 		const {baseAssets,quotedAsset,runInterval} = backtest.config;
 		const {netProfitPercent,maxDropdownPercent,exposurePercent} = backtest.quickResults;
 
+		const cn = mergeStyles(
+			styles.container,
+			isActive && styles.active
+		)
+
 		console.log('Rendering backtest', backtest);
 		return (	
-			<div className={styles.container} onClick={this._onClick}>
+			<div className={cn} onClick={this._onClick}>
 				<div className={styles.title}>
 					<span className={styles.version}>v{backtest.versionNumber}</span>
 					<span className={styles.createdAt}>{ formatDistance(backtest.createdAt, Date.now()) } ago</span>
