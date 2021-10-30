@@ -1,12 +1,13 @@
 import axios, { AxiosResponse } from 'axios';
 import { Portfolio } from '../../../lambdas/lambda.types';
-import { CreateBacktestInput, CreateBacktestRequestPayload } from '../../../lambdas/model.types';
+import { CreateBacktestRequestPayload, ExchangeProvider } from '../../../lambdas/model.types';
 
 export interface CandleOptions {
 	pair: string
 	runInterval: string
 	startDate: number
 	endDate: number
+	provider: ExchangeProvider
 }
 
 export interface CreateDeploymentInput {
@@ -237,8 +238,8 @@ const apiClient = {
 	////////////
 	// CANDLES
 	////////////
-	loadCandles( {pair, runInterval, startDate, endDate}: CandleOptions): Promise<AxiosResponse>{
-		let query = `pair=${pair}&runInterval=${runInterval}&startDate=${startDate}&endDate=${endDate}`;
+	loadCandles( {pair, runInterval, startDate, endDate, provider}: CandleOptions): Promise<AxiosResponse>{
+		let query = `pair=${pair}&runInterval=${runInterval}&startDate=${startDate}&endDate=${endDate}&provider=${provider}`;
 		return axios.get(`${API_URL}/candles?${query}`)
 			.then(res => {
 				console.log(res);

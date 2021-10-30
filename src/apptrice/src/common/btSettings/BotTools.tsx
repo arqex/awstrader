@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { RunInterval } from '../../../../lambdas/model.types';
+import { ExchangeProvider, RunInterval } from '../../../../lambdas/model.types';
 import InitialBalances from './InitialBalances';
 import {Button, InputGroup} from '../../components';
 import ProgressBar from './ProgressBar';
@@ -13,6 +13,7 @@ export interface BacktestConfig {
 	baseAssets: string[],
 	quotedAsset: string,
 	runInterval: RunInterval,
+	exchangeProvider: ExchangeProvider,
 	initialBalances: {[asset: string]: number}
 	startDate: number
 	endDate: number

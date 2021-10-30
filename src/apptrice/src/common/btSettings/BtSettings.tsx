@@ -28,7 +28,7 @@ export default class BtSettings extends React.Component<BtSettingsProps, BtSetti
 		return (
 			<div className={styles.wrapper}>
 				{this.renderBotConfig()}
-				{this.renderTestingTimeframe()}
+				{this.renderTestingData()}
 				{this.renderInitialBalances()}
 				{this.renderExtraConfig()}
 				<div className={styles.fieldGroup}>
@@ -79,14 +79,22 @@ export default class BtSettings extends React.Component<BtSettingsProps, BtSetti
 		);
 	}
 
-	renderTestingTimeframe() {
+	renderTestingData() {
 		return (
 			<div className={styles.fieldGroup}>
 				<div className={styles.groupHeader}>
-					Testing time frame
+					Testing data
 				</div>
 				<div className={styles.field}>
-					<InputGroup name="runInterval" label="Data from">
+					<InputGroup name="exchangeProvider" label="Exchange">
+						<select value={this.state.exchangeProvider} onChange={this._onProviderChange}>
+							<option value="bitfinex">Bitfinex</option>
+							<option value="kucoin">Kucoin</option>
+						</select>
+					</InputGroup>
+				</div>
+				<div className={styles.field}>
+					<InputGroup name="runInterval" label="Test interval">
 						<select value={this.state.testingTimeframe} onChange={this._changeTimeframe}>
 							<option value="1">Last day</option>
 							<option value="3">Last 3 days</option>
@@ -213,6 +221,10 @@ export default class BtSettings extends React.Component<BtSettingsProps, BtSetti
 		this.setState({baseAssets: e.target.value.toUpperCase()});
 	}
 
+	_onProviderChange = (e: any) => {
+		this.setState({exchangeProvider: e.target.value});
+	}
+
 	getValidationErrors() {
 		return {};
 	}
@@ -220,7 +232,7 @@ export default class BtSettings extends React.Component<BtSettingsProps, BtSetti
 	getConfig(): BacktestConfig {
 		let {
 			quotedAsset, runInterval, initialBalances,
-			startDate, endDate, fees, slippage
+			startDate, endDate, fees, slippage, exchangeProvider
 		} = this.state;
 
 		const start = new Date(startDate + 'T00:00:00.000Z');
@@ -239,6 +251,7 @@ export default class BtSettings extends React.Component<BtSettingsProps, BtSetti
 			baseAssets,
 			quotedAsset,
 			runInterval,
+			exchangeProvider,
 			initialBalances: balances,
 			startDate: start.getTime(),
 			endDate: end.getTime(),
@@ -267,7 +280,10 @@ export default class BtSettings extends React.Component<BtSettingsProps, BtSetti
 	}
 
 	getLastBotConfig(): BtSettingsConfig {
-		let config = getBtConfig( this.props.botId ) || this.getDefaultConfig();
+		let config = {
+			...this.getDefaultConfig(),
+			...( getBtConfig( this.props.botId ) || {})
+		};
 
 		if( config.testingTimeframe !== 'custom' ){
 			config.startDate = this.getInputDate( Date.now() - parseInt(config.testingTimeframe) * DAY);
@@ -279,11 +295,11 @@ export default class BtSettings extends React.Component<BtSettingsProps, BtSetti
 
 	getDefaultConfig(): BtSettingsConfig {
 		const DAY = 24 * 60 * 60 * 1000;
-
 		return {
 			baseAssets: 'BTC,ETH',
 			quotedAsset: 'USD',
 			runInterval: '1h',
+			exchangeProvider: 'bitfinex',
 			initialBalances: {
 				USD: '1000'
 			},

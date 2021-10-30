@@ -124,7 +124,7 @@ export default class BtBotRunner implements BotRunner {
 
 	getAllCandles(){
 		const { pairs, runInterval } = this.deployment;
-		return getAllCandles( pairs, runInterval, this.startDate, this.endDate )
+		return getAllCandles( pairs, runInterval, this.startDate, this.endDate, this.exchange.provider )
 			.then( (candles: BotCandles) => {
 				this.candles = candles;
 				this.totalIterations = getTotalIterations(candles);
@@ -256,14 +256,15 @@ export default class BtBotRunner implements BotRunner {
 }
 
 
-async function getAllCandles(pairs: string[], runInterval: string, startDate: number, endDate: number) {
+async function getAllCandles(pairs: string[], runInterval: string, startDate: number, endDate: number, provider: ExchangeProvider) {
 	let start = add200Candles(startDate, runInterval);
 
 	let promises = pairs.map(pair => apiCacher.loadCandles({
 		pair,
 		runInterval,
 		startDate: start,
-		endDate
+		endDate,
+		provider
 	}));
 
 	let candleArr = await Promise.all(promises);

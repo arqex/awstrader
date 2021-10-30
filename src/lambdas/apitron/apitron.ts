@@ -3,22 +3,21 @@ import ExchangeAccountModel from '../_common/dynamo/ExchangeAccountModel';
 import BotDeploymentModel from '../_common/dynamo/BotDeploymentModel';
 import BotModel from '../_common/dynamo/BotModel';
 import lambdaUtil from '../_common/utils/lambda';
-import BitfinexAdapter from '../_common/exchanges/adapters/BitfinexAdapter';
-import exchangeUtils from '../_common/exchanges/exchangeUtils';
 import deploymentAPI from './deployments/deploymentsAPI';
 import exchangesAPI from './exchangeAccounts/exchangesAPI';
 import botsAPI from './bots/botsAPI';
 import pricesAPI from './prices/pricesAPI';
+import candlesAPI from './candles/candlesAPI';
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import * as express from 'express';
 import * as serverless from 'serverless-http';
-import { ModelExchange } from '../model.types';
 import BotVersionModel from '../_common/dynamo/BotVersionModel';
 import botVersionsAPI from './botVersions/botVersionsAPI';
 import backtestsAPI from './backtests/backtestsAPI';
 import setMarketTestEndpoint from '../_common/markets/marketServiceTester';
+
 
 const app = express()
 
@@ -60,6 +59,7 @@ botVersionsAPI.initialize(app);
 deploymentAPI.initialize(app);
 exchangesAPI.initialize(app);
 pricesAPI.initialize(app);
+candlesAPI.initialize(app);
 
 setMarketTestEndpoint(app);
 
@@ -76,8 +76,6 @@ app.post('/runnow', function(req, res) {
 					.json({error: 'not_found'})
 				;
 			}
-			
-			console.log('deployment found');
 
 			lambdaUtil.invokeSupplierdo({accountId, deploymentId})
 				.then(result => {
@@ -89,37 +87,7 @@ app.post('/runnow', function(req, res) {
 	;
 })
 
-app.get('/candles', async function(req,res) {
-	const { pair, runInterval, startDate, endDate, exchange = 'bitfinex' } = req.query;
-
-	// @ts-ignore
-	const dummyExchangeAccount: ModelExchange = {credentials: {key: 'candles', secret: 'candles'}};
-	const adapter = new BitfinexAdapter(dummyExchangeAccount);
-
-	// @ts-ignore
-	const lastCandleAt = exchangeUtils.getLastCandleAt(runInterval, endDate);
-	const candleCount = getCandleCount(startDate, endDate, runInterval );
-	const options = {
-		market: pair,
-		runInterval,
-		candleCount,
-		lastCandleAt
-	};
-
-	console.log( options );
-
-	// @ts-ignore
-	const candles = await adapter.getCandles(options);
-
-	res.json(candles);
-});
-
 export const apitron = serverless(app);
-
-function getCandleCount( startDate, endDate, runInterval ){
-	let length = endDate - startDate;
-	return Math.ceil( length / exchangeUtils.runIntervalTime[runInterval] );
-}
 
 async function setTestData() {
 	let accountId = '0000000000000000000000';

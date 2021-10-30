@@ -2,8 +2,6 @@ import { ModelExchange } from "../../../model.types";
 import { CandleQuery, ExchangeAdapter, ExchangeOrder, ExchangePairs, Ticker } from "../ExchangeAdapter";
 import * as KucoinClient from 'kucoin-node-sdk';
 import { ArrayCandle, OrderInput, Portfolio } from "../../../lambda.types";
-import { createId } from "../../utils/resourceId";
-import pairs from "../../utils/pairs";
 
 // console.log( KucoinClient );
 
@@ -45,7 +43,11 @@ export default class KucoinAdapter implements ExchangeAdapter {
 		console.log('getting candles', pair, timeInterval, thresholds);
 		return KucoinClient.rest.Market.Histories.getMarketCandles( pair, timeInterval, thresholds)
 			.then( res => {
-				return res.data.map( toArrayCandle );
+				console.log(res);
+				if( res.code === '200000' ){
+					return res.data.map( toArrayCandle );
+				}
+				throw new Error( res.msg );
 			})
 		;
 	}

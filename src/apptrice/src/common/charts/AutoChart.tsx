@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ArrayCandle } from '../../../../lambdas/lambda.types';
-import { Order, PairPlotterData, PlotterData } from '../../../../lambdas/model.types';
+import { ExchangeProvider, Order, PairPlotterData, PlotterData } from '../../../../lambdas/model.types';
 import TradingChart, {ChartCandle} from './TradingChart';
 import memoizeOne from 'memoize-one';
 import { candleLoader } from '../../state/loaders/candle.loader';
@@ -9,7 +9,7 @@ import { candleLoader } from '../../state/loaders/candle.loader';
 
 interface AutoChartProps {
 	pair: string,
-	exchange: string,
+	exchange: ExchangeProvider,
 	interval: string,
 	orders: Order[],
 	plotterData?: PlotterData,
@@ -102,7 +102,11 @@ export default class AutoChart extends React.Component<AutoChartProps> {
 	loadCandles( dateToLoad: number, endDate: number ){
 		const {exchange, pair, interval} = this.props;
 		let {data: candles, promise} = candleLoader({
-			exchange, pair, runInterval: interval, startDate: dateToLoad, endDate
+			pair,
+			runInterval: interval,
+			startDate: dateToLoad,
+			endDate,
+			provider: exchange
 		});
 
 		if( candles ){

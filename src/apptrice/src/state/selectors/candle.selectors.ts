@@ -1,9 +1,10 @@
 import { ArrayCandle } from '../../../../lambdas/lambda.types';
+import { CandleOptions } from '../apiClient';
 import { selector, Store } from '../stateManager';
-import { CandlesDescriptor, getCandlesKey } from '../storeKeys';
+import { getCandlesKey } from '../storeKeys';
 
-export function candlesSelector( store: Store, descriptor: CandlesDescriptor) {
+export function candlesSelector( store: Store, descriptor: CandleOptions) {
 	return store.transientData.candles[ getCandlesKey(descriptor) ];
 }
 
-export const getCandles = selector<CandlesDescriptor, ArrayCandle[]>( candlesSelector );
+export const getCandles = selector<CandleOptions, ArrayCandle[]>( candlesSelector );

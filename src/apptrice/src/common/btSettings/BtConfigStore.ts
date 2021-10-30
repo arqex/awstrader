@@ -1,4 +1,4 @@
-import { RunInterval } from "../../../../lambdas/model.types";
+import { ExchangeProvider, RunInterval } from "../../../../lambdas/model.types";
 
 const LS_KEY = "BT_CONFIGS";
 
@@ -10,6 +10,7 @@ export interface BtSettingsConfig {
 	baseAssets: string
 	quotedAsset: string
 	runInterval: RunInterval
+	exchangeProvider: ExchangeProvider
 	initialBalances: { [asset: string]: string },
 	testingTimeframe: string
 	startDate?: string

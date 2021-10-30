@@ -1,6 +1,6 @@
 import { BacktestConfig } from "../../common/btSettings/BotTools";
 import {v4 as uuid} from 'uuid';
-import { ModelExchange } from "../../../../lambdas/model.types";
+import { ModelExchange, RunnableDeployment } from "../../../../lambdas/model.types";
 import BtBotRunner from "./BtBotRunner";
 import { runBotIteration } from "../../../../lambdas/_common/botRunner/runBotIteration";
 import { BtActive, BtExchange } from "./Bt.types";
@@ -45,7 +45,7 @@ async function prepareAndRun(btid: string, version: StoreBotVersion, options: Ba
 		balances: options.initialBalances,
 		fees: options.fees,
 		slippage: options.slippage,
-		exchange: 'bitfinex'
+		exchange: options.exchangeProvider
 	});
 
 	setInitialBt(btid, version, runner, options);
@@ -53,7 +53,20 @@ async function prepareAndRun(btid: string, version: StoreBotVersion, options: Ba
 	BtUpdater.update({
 		status: 'candles'
 	});
-	await runner.getAllCandles();
+
+	try {
+		await runner.getAllCandles();
+	}
+	catch( err: any ){
+		console.log( err );
+		logError(
+			runner.deployment,
+			'Error loading candles.',
+			err?.response?.data?.error
+		);
+		runner.bot?.terminate();
+		return;
+	}
 
 	BtUpdater.update({
 		status: 'running',
@@ -141,4 +154,17 @@ function toStoreBt( bt: BtActive ): CreateBacktestInput {
 			}
 		}
 	}
+}
+
+function logError( deployment:RunnableDeployment, errorType: string, errorMessage: string){
+		BtUpdater.update({
+			status: 'error',
+			deployment: {	
+				...deployment,
+				logs: [
+					{id: 1, date: Date.now(), type: 'error', message: errorType},
+					{id: 2, date: Date.now(), type: 'error', message: errorMessage},
+				]
+			}
+		})
 }
