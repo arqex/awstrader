@@ -13,7 +13,6 @@ function initializeState( config, state ){
 	state.currentMarketPosition = false;
 	state.marketPositionAmount = 0;
 	state.currentLimitPosition = false;
-
 }
 
 function onData( input: BotInput) {

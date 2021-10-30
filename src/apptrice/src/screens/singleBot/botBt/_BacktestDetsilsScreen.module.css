@@ -1,0 +1,26 @@
+.container {
+	width: 100%;
+}
+.main {
+	display: flex;
+	flex: 1;
+	min-width: 0;
+	width: 100%;
+	margin-bottom: 20px;
+}
+
+.table {
+	flex-grow: 0;
+	flex-shrink: 0;
+}
+
+.returns {
+	padding-left: 10px;
+	flex-grow: 1;
+}
+
+.orderLink {
+	margin-top: 10px;
+	width: 100%;
+	text-align: right;
+}

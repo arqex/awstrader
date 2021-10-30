@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Editor from '@monaco-editor/react';
+import Editor, {loader} from '@monaco-editor/react';
 import { ScreenProps } from '../../../types';
 import BotSaver from '../BotSaver';
 import apiCacher from '../../../state/apiCacher';
@@ -11,6 +11,12 @@ import BotEditorLayout from './BotEditorLayout';
 import { BotScreenProps } from '../BotScreenProps';
 import { botVersionLoader } from '../../../state/loaders/botVersion.loader';
 import { StoreBotVersion } from '../../../state/stateManager';
+
+// Load monaco files from local instead from a CDN
+const {protocol, host} = window.location;
+loader.config({
+	paths: {vs: `${protocol}//${host}/monaco/min/vs`}
+});
 
 class BotEditorScreen extends React.Component<BotScreenProps> {
 	state = {

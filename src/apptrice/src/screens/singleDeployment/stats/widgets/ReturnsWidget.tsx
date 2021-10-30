@@ -9,7 +9,8 @@ import trim from '../../../../utils/trim';
 import { getDeploymentAssets, getPortfolioValue } from '../../../../../../lambdas/_common/utils/deploymentUtils';
 
 interface ReturnsWidgetProps {
-	deployment?: RunnableDeployment
+	deployment?: RunnableDeployment,
+	showTitle?: boolean
 }
 
 export default class ReturnsWidget extends React.Component<ReturnsWidgetProps> {
@@ -17,15 +18,21 @@ export default class ReturnsWidget extends React.Component<ReturnsWidgetProps> {
 		return (
 			<div className={styles.container}>
 				<Card>
-					<div>
-						<h3>Returns</h3>
-					</div>
+					{ this.renderTitle() }
 					{ this.renderContent() }
 				</Card>
 			</div>
 		)
 	}
 
+	renderTitle(){
+		if( !this.props.showTitle ) return;
+		return (
+			<div>
+				<h3>Returns</h3>
+			</div>
+		);
+	}
 
 	renderContent() {
 		if( !this.hasRun() ){

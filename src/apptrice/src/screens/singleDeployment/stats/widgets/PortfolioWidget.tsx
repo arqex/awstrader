@@ -1,11 +1,6 @@
 import * as React from 'react'
-import { Balance } from '../../../../../../lambdas/lambda.types';
-import { PortfolioHistoryItem } from '../../../../../../lambdas/model.types';
-import { getDeploymentAssets } from '../../../../../../lambdas/_common/utils/deploymentUtils';
-import { Card, Table } from '../../../../components';
-import priceLoader from '../../../../state/loadersOld/price.loader';
+import { Card } from '../../../../components';
 import { BtDeployment } from '../../../../utils/backtest/Bt.types';
-import trim from '../../../../utils/trim';
 import styles from './_PortfolioWidget.module.css';
 
 interface PortfolioWidgetProps {

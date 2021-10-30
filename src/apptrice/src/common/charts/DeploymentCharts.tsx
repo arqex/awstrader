@@ -1,12 +1,13 @@
 import memoizeOne from 'memoize-one';
 import * as React from 'react'
-import { DeploymentOrders, ExchangeProvider, Order, RunnableDeployment } from '../../../../lambdas/model.types';
+import { DeploymentOrders, ExchangeProvider, Order } from '../../../../lambdas/model.types';
 import { Tabs, Tab } from '../../components';
 import AutoChart from './AutoChart';
+import { ChartableDeployment } from './chart.types';
 import styles from './_DeploymentCharts.module.css';
 
 interface DeploymentChartsProps {
-	deployment: RunnableDeployment,
+	deployment: ChartableDeployment,
 	exchangeProvider: ExchangeProvider,
 	selector?: 'tabs' | 'dropdown',
 	activePair?: string,
