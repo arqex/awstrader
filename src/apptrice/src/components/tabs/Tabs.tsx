@@ -4,8 +4,8 @@ import Tab from './Tab';
 import styles from './_Tabs.module.css';
 
 interface TabsProps {
-	active: string
-	onChange: (activeTabId: string) => void
+	active?: string
+	onChange?: (activeTabId: string) => void
 	children: React.ReactElement<Tab>[]
 }
 
@@ -23,9 +23,10 @@ export default class Tabs extends React.Component<TabsProps> {
 	renderTab(child: React.ReactElement<Tab> ){
 		// @ts-ignore
 		let {id} = child.props;
+		const {onChange} = this.props;
 		return (
 			<WrappedTab id={id}
-				onClick={ () => this.props.onChange(id) }
+				onClick={ () => onChange && onChange(id) }
 				isActive={ this.props.active === id }>
 				{ child }
 			</WrappedTab>

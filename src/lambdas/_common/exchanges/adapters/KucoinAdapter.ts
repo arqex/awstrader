@@ -45,7 +45,8 @@ export default class KucoinAdapter implements ExchangeAdapter {
 			.then( res => {
 				console.log(res);
 				if( res.code === '200000' ){
-					return res.data.map( toArrayCandle );
+					// Kucoin candles come sorted by decreasing date, reverse them
+					return res.data.reverse().map( toArrayCandle );
 				}
 				throw new Error( res.msg );
 			})

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { BacktestConfig } from '../../../../../lambdas/model.types';
 import { ChartableDeployment } from '../../../common/charts/chart.types';
 import ChartWithOrders from '../../../common/charts/ChartWithOrders';
-import { ScreenWrapper } from '../../../components';
+import { ScreenWrapper, Tabs, Tab } from '../../../components';
 import { fullBacktestLoader } from '../../../state/loaders/fullBacktest.loader'
 import { StoreBacktest, BtDeploymentDetails } from '../../../state/stateManager';
 import PortfolioHistoryWidget from '../../singleDeployment/stats/widgets/PortfolioHistoryWidget';
@@ -18,62 +18,78 @@ interface BacktestDetailsScreenProps extends BotScreenProps {
 export default class BacktestDetailsScreen extends React.Component<BacktestDetailsScreenProps> {
 	render() {
 		const {data:bt} = fullBacktestLoader(this.props.backtestId);
-		if( !bt  || !bt.fullResults ) return <span>Loading...</span>;
+		if( !bt || !bt.fullResults ) return <span>Loading...</span>;
 
-		if( this.isOrdersSection() ){
-			return this.renderOrders(bt);
-		}
 
 		console.log( bt );
 		return (
 			<ScreenWrapper title="Backtest">
 				<div className={styles.container}>
-					<div className={styles.main}>
-						<div className={styles.table}>
-							<StatsWidget
-								id={bt.id}
-								currency={bt.config.quotedAsset}
-								stats={bt.fullResults?.stats} />
-						</div>
-						<div className={styles.returns}>
-							<ReturnsWidget
-								/* @ts-ignore */
-								deployment={this._getDeployment(bt)} />
-							<div className={styles.orderLink}>
-								<a href={this.getOrdersLink()}>See orders</a>
-							</div>
-						</div>
-					</div>
-					<PortfolioHistoryWidget
-						/* @ts-ignore */
-						deployment={this._getDeployment(bt)} />
+					{ this.renderTabs() }
+					{ this.renderContent(bt) }
 				</div>
 			</ScreenWrapper>
-		)
+		);
+	}
+	renderTabs() {
+		return (
+			<div className={styles.tabs}>
+				<Tabs active={ this.getSelectedTab() }>
+					<Tab id="overview" link={ this.getSectionLink('overview') }>Overview</Tab>
+					<Tab id="orders" link={ this.getSectionLink('orders') }>Orders</Tab>
+				</Tabs>
+			</div>
+		);
+	}
+	renderContent(bt: StoreBacktest) {
+		if( this.isOrdersSection() ){
+			return this.renderOrders(bt);
+		}
+		return this.renderOverview(bt)
+	}
+
+	renderOverview(bt: StoreBacktest){
+		if( !bt || !bt.fullResults ) return <span>Loading...</span>;
+		return (
+			<div className={styles.container}>
+				<div className={styles.main}>
+					<div className={styles.table}>
+						<StatsWidget
+							id={bt.id}
+							currency={bt.config.quotedAsset}
+							stats={bt.fullResults?.stats} />
+					</div>
+					<div className={styles.returns}>
+						<ReturnsWidget
+							/* @ts-ignore */
+							deployment={this._getDeployment(bt)} />
+					</div>
+				</div>
+				<PortfolioHistoryWidget
+					/* @ts-ignore */
+					deployment={this._getDeployment(bt)} />
+			</div>
+		);
 	}
 
 	renderOrders(bt: StoreBacktest){
 		console.log(bt);
 		if( !bt.fullResults?.deploymentDetails ){
 			return (
-				<ScreenWrapper title="Backtest">
-					<div className={styles.container}>
-						Detailed data about orders is not available.
-					</div>
-				</ScreenWrapper>
+				<div className={styles.container}>
+					Detailed data about orders is not available.
+				</div>
 			);
 		}
 
 		const {exchange, deploymentDetails} = bt.fullResults;
 
 		return (
-			<ScreenWrapper title="Backtest">
-				<div className={styles.container}>
-					<ChartWithOrders
-						deployment={ this.getChartableDeployment(bt.config, deploymentDetails) }
-						exchangeProvider={ exchange.provider } />
-				</div>
-			</ScreenWrapper>
+			<div className={styles.container}>
+				<ChartWithOrders
+					deployment={ this.getChartableDeployment(bt.config, deploymentDetails) }
+					exchangeProvider={ exchange.provider } />
+			</div>
 		);
 	}
 
@@ -94,6 +110,19 @@ export default class BacktestDetailsScreen extends React.Component<BacktestDetai
 
 	isOrdersSection() {
 		return this.props.router.location.query.section === 'orders';
+	}
+
+	getSectionLink( section: string ) {
+		let path = this.props.router.location.pathname;
+		if( section !== 'overview' ){
+			return `${path}?section=${section}`;
+		}
+		return path;
+	}
+
+	getSelectedTab() {
+		if( this.isOrdersSection() ) return 'orders';
+		return 'overview';
 	}
 }
 
