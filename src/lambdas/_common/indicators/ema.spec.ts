@@ -8,8 +8,6 @@ describe('ema', () => {
 
 		expect( result.slice(0, 7) ).toEqual([0,0,0,0,0,0,0]);
 		expect( result.length ).toBe(candles.length);
-		
-		
 		expect( truncate(result[7]) ).toBe('5.375');
 		expect( truncate(result[8]) ).toBe('6.402');
 		expect( truncate(result[9]) ).toBe('7.424');

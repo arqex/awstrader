@@ -14,6 +14,7 @@ function onData( input: BotInput) {
     const [isCrossover] = utils.isCrossOver( sma14, sma50 ).slice(-1);
     const [isCrossunder] = utils.isCrossUnder( sma14, sma50 ).slice(-1);
 
+    /*
     const [pprev, prevCandle, lastCandle] = utils.getCandles(candleData[pair].slice(-3));
     if( pprev.high < prevCandle.high && prevCandle.high >lastCandle.high ){
         plotter.plotPoint('tops', pair, prevCandle.high );
@@ -21,6 +22,7 @@ function onData( input: BotInput) {
     if( pprev.low > prevCandle.low && prevCandle.low < lastCandle.low ){
         plotter.plotPoint('bottoms', pair, prevCandle.low );
     }
+    */
 
 
     if( !state.currentBuy && isCrossover ){

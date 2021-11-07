@@ -19,7 +19,7 @@ export function atr(data: ArrayCandle[], period: number) {
 }
 
 
-function trueRange(currentCandle, prevCandle?) {
+export function trueRange(currentCandle, prevCandle?) {
 	if( prevCandle ){
 		return Math.max(prevCandle[2], currentCandle[3]) - Math.min(prevCandle[2], currentCandle[4]);
 	}
