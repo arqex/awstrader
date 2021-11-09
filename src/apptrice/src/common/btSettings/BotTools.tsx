@@ -277,6 +277,7 @@ export default class BotTools extends React.Component<BotToolsProps> {
 			baseAssets: this.getPairs().slice(1),
 			quotedAsset,
 			runInterval,
+			exchangeProvider: 'bitfinex',
 			initialBalances: balances,
 			startDate: start.getTime(),
 			endDate: end.getTime(),

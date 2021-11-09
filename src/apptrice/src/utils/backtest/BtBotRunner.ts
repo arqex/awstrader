@@ -43,6 +43,7 @@ export default class BtBotRunner implements BotRunner {
 	bot: IBtRunnableBot | undefined
 
 	constructor( config: BtBotRunnerConfig ){
+		// @ts-ignore
 		const portfolio = createPortfolio(config.balances);
 
 		this.deployment = {
@@ -72,8 +73,8 @@ export default class BtBotRunner implements BotRunner {
 
 		this.exchange = {
 			id: 'btDeployment',
+			createdAt: Date.now(),
 			accountId: config.accountId,
-			resourceId: '',
 			name: 'BT Exchange',
 			provider: config.exchange,
 			type: 'virtual',
@@ -174,14 +175,7 @@ export default class BtBotRunner implements BotRunner {
 	updateExchange( exchange: ModelExchange, update: BotRunnerExchangeUpdate ) {
 		this.exchange = {
 			...this.exchange,
-			...update,
-			portfolioHistory: [
-				...(this.exchange.portfolioHistory || []),
-				{
-					date: this.adapter.lastDate,
-					balances: update.portfolio || {}
-				}
-			]
+			...update
 		}
 
 		return Promise.resolve(this.exchange);
@@ -221,6 +215,7 @@ export default class BtBotRunner implements BotRunner {
 			// backtesting, so update the creation date to say so
 			order.createdAt = adapter.lastDate;
 		});
+		// @ts-ignore
 		return adapter.placeOrders(orders);
 	}
 
@@ -237,7 +232,7 @@ export default class BtBotRunner implements BotRunner {
 			let portfolioWithPrices: PortfolioWithPrices = {};
 			for (let asset in config.balances) {
 				let assetCandles = iterationCandles[`${asset}/${config.quotedAsset}`];
-				let balance = config.balances[asset];
+				let balance = parseFloat(config.balances[asset]);
 				portfolioWithPrices[asset] = {
 					asset,
 					total: balance,

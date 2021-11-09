@@ -1,11 +1,11 @@
 import * as React from 'react'
-import { Order } from '../../../../../lambdas/lambda.types';
 import BuyMarker from './BuyMarker';
 import ErrorMarker from './ErrorMarker';
 import SellMarker from './SellMarker';
 
 import { GenericChartComponent, getAxisCanvas } from '@react-financial-charts/core';
 import { CircleMarker, Square } from '@react-financial-charts/series';
+import { Order } from '../../../../../lambdas/model.types';
 
 interface OrderSeriesProps {
 	orders: any,

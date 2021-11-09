@@ -42,6 +42,7 @@ async function prepareAndRun(btid: string, version: StoreBotVersion, options: Ba
 		runInterval: options.runInterval,
 		startDate: options.startDate,
 		endDate: options.endDate,
+		// @ts-ignore
 		balances: options.initialBalances,
 		fees: options.fees,
 		slippage: options.slippage,

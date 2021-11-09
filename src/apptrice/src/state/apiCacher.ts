@@ -516,7 +516,7 @@ const apiCacher = {
 		return apiClient.loadCandles(options).then( res => {
 			reducer<any>( (store, res) => {
 				let {pair, runInterval, startDate, endDate} = options;
-				let key = getCandlesKey({exchange: 'bitfinex',pair,runInterval,startDate,endDate});
+				let key = getCandlesKey({provider: 'bitfinex',pair,runInterval,startDate,endDate});
 				return {
 					...store,
 					transientData: {

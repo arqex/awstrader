@@ -1,12 +1,12 @@
 import { BotConfigurationExtra, BotExecutorResult, BotState, Portfolio } from "../../../../lambdas/lambda.types";
-import { ConsoleEntry, DeploymentOrders, Order, RunnableDeployment } from "../../../../lambdas/model.types";
+import { BaseExchange, ConsoleEntry, DeploymentOrders, Order, RunnableDeployment } from "../../../../lambdas/model.types";
 import { BotRunInput } from "../../../../lambdas/_common/botRunner/BotRunner";
 import { ExchangeAdapter, ExchangeOrder } from "../../../../lambdas/_common/exchanges/ExchangeAdapter";
 
 export async function runBotIteration( deploymentId: string, runner: BotRunner ){
 	/*
 	let deployment: DBBotDeployment = await runner.getDeployment( deploymentId );
-	let exchange: DbExchangeAccount = await runner.getExchangeAccount( deployment.exchangeAccountId );
+	let exchange: BaseExchange = await runner.getExchangeAccount( deployment.exchangeAccountId );
 	let adapter: ExchangeAdapter = runner.getAdapter( exchange );
 	let bot: RunnableBot = await runner.getBot( deployment.botId );
 
@@ -90,11 +90,11 @@ interface BotRunnerExchangeUpdate {
 
 interface BotRunner {
 	getDeployment( deploymentId: string ): Promise<RunnableDeployment>
-	getExchangeAccount( exchangeAccountId: string ): Promise<DbExchangeAccount>
-	getAdapter( exchange: DbExchangeAccount ): ExchangeAdapter
+	getExchangeAccount( exchangeAccountId: string ): Promise<BaseExchange>
+	getAdapter( exchange: BaseExchange ): ExchangeAdapter
 	getBot( botId: string ): Promise<RunnableBot>
 	updateDeployment( deployment: RunnableDeployment, update: BotRunnerDeploymentUpdate ): Promise<RunnableDeployment>,
-	updatePortfolio( exchange: DbExchangeAccount, update: BotRunnerExchangeUpdate): Promise<DbExchangeAccount>,
+	updatePortfolio( exchange: BaseExchange, update: BotRunnerExchangeUpdate): Promise<BaseExchange>,
 	setRunError( error: any ): Promise<void>
 	cancelOrders( adapter: ExchangeAdapter, ordersToCancel: Order[] ): Promise<Order[]>
 	placeOrders( adapter: ExchangeAdapter, ordersToPlace: Order[]): Promise<Order[]>

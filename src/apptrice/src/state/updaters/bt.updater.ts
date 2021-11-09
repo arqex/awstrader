@@ -96,14 +96,9 @@ export const BtUpdater = {
 			activeBt.data.deployment = deploymentUpdate;
 		}
 
-		if( data.portfolioHistory || data.fees || data.slippage || data.provider ) {
+		if( data.portfolioHistory || data.provider ) {
 			let exchangeUpdate: BtExchange = { ...activeBt.data.exchange };
-			if (data.fees) {
-				exchangeUpdate.fees = data.fees;
-			}
-			if (data.slippage) {
-				exchangeUpdate.slippage = data.slippage;
-			}
+
 			if(data.provider ){
 				exchangeUpdate.provider = data.provider;
 			}
@@ -130,6 +125,7 @@ export const BtUpdater = {
 	})
 }
 
+// @ts-ignore
 const defaultActiveBt: BtActive = {
 	totalIterations: 0,
 	currentIteration: 0,
@@ -165,9 +161,7 @@ const defaultActiveBt: BtActive = {
 			}
 		},
 		exchange: {
-			provider: 'bitfinex',
-			fees: 0,
-			slippage: 0
+			provider: 'bitfinex'
 		}
 	}
 }
