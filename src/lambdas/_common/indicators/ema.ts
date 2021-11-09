@@ -1,5 +1,5 @@
 import { ArrayCandle, CandleAttribute } from "../../lambda.types";
-import { sma } from "./sma";
+import { calculateSMA } from "./sma";
 
 const attributeIndex = {
 	open: 1,
@@ -17,8 +17,9 @@ export function emaArray(data: number[], period: number){
 	return calculateEMA(data, (v:number) => v, period);
 }
 
-function calculateEMA(data: any, accessor: any, period: number ){
-	const results = sma( data.slice(0,period), period );
+export function calculateEMA(data: any, accessor: any, period: number ){
+	let results = calculateSMA( data.slice(0, period), accessor, period );
+
 	const exponent = (2/(period+1));
 	for(let i = period; i < data.length; i++){
 		results.push(

@@ -8,7 +8,7 @@ interface MACDOptions {
 	signalSmoothing?: number
 }
 
-const defaultOptions = {
+const defaultOptions: MACDOptions = {
 	quickLength: 12,
 	slowLength: 26,
 	attr: 'close',
@@ -21,18 +21,26 @@ export function macd( data: ArrayCandle[], options?: MACDOptions ){
 		...(options || {})
 	};
 
+	if( !attr || !quickLength || !slowLength || !signalSmoothing ) return;
+
 	let quickEma = ema(data, quickLength, attr);
 	let slowEma = ema(data, slowLength, attr);
 
-	let macdData = quickEma.map( (quick, i) => (
-		quick - slowEma[i]
-	));
+	// console.log( quickEma.length, slowEma.length );
+	let macdData = slowEma.map( (slow, i) => {
+		if( slow ){
+			return quickEma[i] - slow;
+		}
+		return 0;
+	});
 
-	let signal = emaArray( macdData, signalSmoothing );
+	let signal = emaArray( macdData.slice( slowLength ), signalSmoothing );
+	console.log( 'SLOW', slowEma );
 
 	return macdData.map( (m,i) => ({
 		macd: m,
-		signal: i < signalSmoothing ? 0 : signal[i-signalSmoothing]
+		// @ts-ignore
+		signal: signal[i-slowLength] || 0
 	}));
 }
 

@@ -16,7 +16,7 @@ export function smaArray( data: number[], period: number ){
 	return calculateSMA( data, (value:number) => value, period );
 }
 
-function calculateSMA( data: any, accessor: any, period: number ){
+export function calculateSMA( data: any, accessor: any, period: number ){
 	let sum = 0;
 	let length = data.length;
 	let values = new Array<number>(length);
