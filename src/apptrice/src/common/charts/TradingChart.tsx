@@ -5,10 +5,10 @@ import memoizeOne from 'memoize-one';
 import { Order, PairPlotterData } from '../../../../lambdas/model.types';
 import ChartX from './components/ChartX';
 import { PlotterSeries } from '../../../../lambdas/_common/botRunner/botRunPlotter';
-import chartUtils, { ChartData, colors, RunnableIndicator } from './chartUtils';
+import chartUtils, { ChartDataItem, colors, RunnableIndicator } from './chartUtils';
 import { XAxis, YAxis } from '@react-financial-charts/axes';
 import { Chart } from '@react-financial-charts/core';
-import { CandlestickSeries, BarSeries, LineSeries, RSISeries } from '@react-financial-charts/series';
+import {  BarSeries, LineSeries, RSISeries } from '@react-financial-charts/series';
 import { CrossHairCursor, EdgeIndicator, MouseCoordinateX, MouseCoordinateY } from '@react-financial-charts/coordinates';
 import { MovingAverageTooltip, RSITooltip } from '@react-financial-charts/tooltip';
 
@@ -16,6 +16,8 @@ import { format} from 'd3-format';
 import { timeFormat } from 'd3-time-format';
 import { PointSeries } from './components/PointSeries';
 import { Line } from './components/Line';
+import { ArrayCandle } from '../../../../lambdas/lambda.types';
+import { CandlestickSeries } from './components/CandlestickSeries';
 
 interface DataByCharts {
 	[chart: string]: ChartPlotterData
@@ -44,7 +46,7 @@ interface TradingChartProps {
 	data: any,
 	orders: Order[],
 	patterns?: string[],
-	candles: ChartCandle[],
+	candles: ArrayCandle[],
 	includePreviousCandles: boolean,
 	onLoadMore?: (start: number, end: number ) => void,
 	highlightedInterval?: [number, number],
@@ -94,20 +96,23 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 	renderCandlesChart( plotterData: ChartPlotterData ){
 		const {orders} = this.props;
 		const candles = this.getChartData();
-		const indicators = chartUtils.getRunnableIndicators( plotterData?.indicators ).filter( i => i.tooltip === 'ma' );
+		const indicators = chartUtils
+			.getRunnableIndicators( plotterData?.indicators )
+			.filter( i => i.tooltip === 'ma' )
+		;
 
 		return (
-			<Chart id={1} yExtents={(d: any) => [d.high, d.low]}>
+			<Chart id={1} yExtents={(d: ChartDataItem) => [d[3], d[4]]}>
 				<XAxis axisAt="bottom" orient="bottom" {...axisStyles }/>
 				<YAxis axisAt="right"
 					orient="right"
 					ticks={5}
 					{...axisStyles} />
-				{ this.renderMouseCoordinates() }
-				{ this.renderIndicatorLineSeries( indicators )}
 				<CandlestickSeries
 					yAccessor={ chartUtils.candleAccessor }
 					{...this.getCandleStyles('#d05773', '#29946d') } />
+				{ this.renderMouseCoordinates() }
+				{ this.renderIndicatorLineSeries( indicators )}
 				<OrderSeries orders={orders} candles={candles} />
 				{ this.renderPoints(plotterData.points) }
 				{ this.renderLines(plotterData.series) }
@@ -120,14 +125,11 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 	}
 
 	renderVolumeChart( plotterData: ChartPlotterData ) {
-		const volumeAccessor = (d: any) => {
-			return d.volume;
-		}
 		return (
 			<Chart id={2}
 				height={100}
 				origin={(w: number, h: number) => [0, h - 100]}
-				yExtents={volumeAccessor}>
+				yExtents={chartUtils.getYAccessor('volume')}>
 				<YAxis axisAt="left"
 					orient="left"
 					ticks={3}
@@ -135,7 +137,7 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 					{...axisStyles}
 					showGridLines={false} />
 				<BarSeries
-					yAccessor={volumeAccessor}
+					yAccessor={chartUtils.getYAccessor('volume')}
 					fillStyle={ this.getCandleStyles('#78a4b9', '#bd66a9').fill } />
 			</Chart>
 		)
@@ -250,17 +252,17 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 
 	getCandleStyles( up:string, down:string) {
 		const {highlightedInterval: hi} = this.props;
-		let strokeColor: any = (d: ChartCandle) => {
-			return d.close < d.open ? up : down;
+		let strokeColor: any = (d: ChartDataItem) => {
+			return d[2] < d[1] ? up : down;
 		}
 
 		if( hi ){
-			strokeColor = function (d: ChartCandle) {
-				let isHighlighted = d.date > hi[0] && d.date < hi[1];
+			strokeColor = function (d: ChartDataItem) {
+				let isHighlighted = d[0] > hi[0] && d[0] < hi[1];
 				if( isHighlighted ){
-					return d.close < d.open ? up : down;
+					return d[2] < d[1] ? up : down;
 				}
-				return d.close < d.open ? up+'77' : down+'77';
+				return d[2] < d[1] ? up+'77' : down+'77';
 			}
 		}
 
@@ -272,14 +274,14 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 		}
 	}
 
-	getChartData(): ChartData[]{
+	getChartData(): ChartDataItem[]{
 		const {candles, plotterData} = this.props; 
 		return augmentData( candles, plotterData?.indicators );
 	}
 
 	getPriceFormat(){
 		const data = this.getChartData();
-		return format(chartUtils.getFormat(data[0].close));
+		return format(chartUtils.getFormat(data[0][2]));
 	}
 
 	renderPoints( points?: PlotterSeries ){
@@ -307,9 +309,8 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 	}
 }
 
-
-const augmentData = memoizeOne( (candles: ChartCandle[], indicators?: string[] ) => {
-	let augmented: ChartData[] = candles.map( c => ({...c, calculated:{}}) );
+const augmentData = memoizeOne( (candles: ArrayCandle[], indicators?: string[] ): ChartDataItem[] => {
+	let augmented: ChartDataItem[] = candles.map( candle => ({...candle, calculated:{}}) );
 
 	if( !indicators || !indicators.length ){
 		return augmented;

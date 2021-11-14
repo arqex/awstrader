@@ -22,8 +22,7 @@ export default class BacktestListItem extends React.Component<BacktestListItemPr
 			styles.container,
 			isActive && styles.active
 		)
-
-		console.log('Rendering backtest', backtest);
+		
 		return (	
 			<div className={cn} onClick={this._onClick}>
 				<div className={styles.title}>

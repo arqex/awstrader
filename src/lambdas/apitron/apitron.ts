@@ -169,7 +169,7 @@ async function setTestData() {
 		await BotVersionModel.create({
 			botId: '4444444444444444444444' + accountId,
 			number: '0.0',
-			code: readFileSync(join(__dirname, '../../../bots/simpleBot.ts'), 'utf8')
+			code: readFileSync(join(__dirname, '../../../bots/testBot.ts'), 'utf8')
 		})
 	}
 	else {

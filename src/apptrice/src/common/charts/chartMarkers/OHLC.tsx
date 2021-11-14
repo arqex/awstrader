@@ -19,6 +19,7 @@ export default function OHLC(props: any) {
 			displayTexts={ displayTexts }
 			origin={[-50,0]}
 			labelFill="#f390dd"
+			accessor={chartUtils.candleAccessor}
 			ohlcFormat={ (n: number) => format( chartUtils.getFormat(n) )(n) }
 			textFill="#b2b1d8">
 			{ defaultDisplay }
@@ -27,6 +28,8 @@ export default function OHLC(props: any) {
 }
 
 function defaultDisplay(props: any, moreProps: any, itemsToDisplay: any ) {
+
+	console.log('Default display!');
 
 	/* eslint-disable */
 	const {

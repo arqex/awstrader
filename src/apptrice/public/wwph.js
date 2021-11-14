@@ -97,7 +97,10 @@
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BotRunIndicators = void 0;
+var bollinger_1 = __webpack_require__(/*! ../indicators/bollinger */ "../lambdas/_common/indicators/bollinger.ts");
+var keltner_1 = __webpack_require__(/*! ../indicators/keltner */ "../lambdas/_common/indicators/keltner.ts");
 var sma_1 = __webpack_require__(/*! ../indicators/sma */ "../lambdas/_common/indicators/sma.ts");
+var topbot_1 = __webpack_require__(/*! ../indicators/topbot */ "../lambdas/_common/indicators/topbot.ts");
 var BotRunIndicators = /** @class */ (function () {
     function BotRunIndicators(indicators) {
         if (indicators === void 0) { indicators = []; }
@@ -121,6 +124,16 @@ var BotRunIndicators = /** @class */ (function () {
     BotRunIndicators.prototype.smaArray = function (candleData, period) {
         // This indicator can't be displayed in the charts, don't store in the used ones
         return sma_1.smaArray(candleData, period);
+    };
+    BotRunIndicators.prototype.bollinger = function (candleData) {
+        return bollinger_1.bollinger(candleData);
+    };
+    BotRunIndicators.prototype.keltner = function (candleData) {
+        return keltner_1.keltner(candleData);
+    };
+    BotRunIndicators.prototype.topbot = function (candleData) {
+        this.indicatorsUsed["topbot"] = true;
+        return topbot_1.topbot(candleData);
     };
     return BotRunIndicators;
 }());
@@ -410,6 +423,188 @@ var baseLevels = [1000000, 1009889, 1019875, 1029960, 1040145, 1050431, 1060818,
 
 /***/ }),
 
+/***/ "../lambdas/_common/indicators/atr.ts":
+/*!********************************************!*\
+  !*** ../lambdas/_common/indicators/atr.ts ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.trueRange = exports.atr = void 0;
+function atr(data, period) {
+    var result = [];
+    var sum = 0;
+    for (var i = 0; i < period; i++) {
+        sum += trueRange(data[i], data[i - 1]);
+        result.push(sum / (i + 1));
+    }
+    for (var i = period; i < data.length; i++) {
+        result.push((result[i - 1] * (period - 1) +
+            trueRange(data[i], data[i - 1])) / period);
+    }
+    return result;
+}
+exports.atr = atr;
+function trueRange(currentCandle, prevCandle) {
+    if (prevCandle) {
+        return Math.max(prevCandle[2], currentCandle[3]) - Math.min(prevCandle[2], currentCandle[4]);
+    }
+    return currentCandle[3] - currentCandle[4];
+}
+exports.trueRange = trueRange;
+
+
+/***/ }),
+
+/***/ "../lambdas/_common/indicators/bollinger.ts":
+/*!**************************************************!*\
+  !*** ../lambdas/_common/indicators/bollinger.ts ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.calculateStandardDeviation = exports.bollinger = void 0;
+var sma_1 = __webpack_require__(/*! ./sma */ "../lambdas/_common/indicators/sma.ts");
+function bollinger(data, options) {
+    var _a = __assign({ period: 20, stdDev: 2, valueAttribute: 'close' }, (options || {})), period = _a.period, stdDev = _a.stdDev, valueAttribute = _a.valueAttribute;
+    var values = data.map(getAccesor(valueAttribute));
+    var smaData = sma_1.smaArray(values, period);
+    var sd = calculateStandardDeviation(values, smaData, period);
+    return smaData.map(function (ma, i) { return ({
+        middle: ma,
+        upper: ma + (stdDev * sd[i]),
+        lower: ma - (stdDev * sd[i])
+    }); });
+}
+exports.bollinger = bollinger;
+function calculateStandardDeviation(prices, smaData, period) {
+    var result = [];
+    smaData.forEach(function (avg, i) {
+        if (!avg)
+            return result.push(avg);
+        var sum = 0;
+        for (var j = i - period + 1; j <= i; j++) {
+            sum += Math.pow(prices[j] - avg, 2);
+        }
+        result.push(Math.sqrt(sum / period));
+    });
+    return result;
+}
+exports.calculateStandardDeviation = calculateStandardDeviation;
+var accessors = {
+    open: function (c) { return c[1]; },
+    close: function (c) { return c[2]; },
+    high: function (c) { return c[3]; },
+    low: function (c) { return c[4]; },
+    volume: function (c) { return c[5]; },
+    hlc3: function (c) { return (c[2] + c[3] + c[4]) / 3; },
+    hl2: function (c) { return (c[3], c[4]) / 2; }
+};
+function getAccesor(key) {
+    return accessors[key];
+}
+
+
+/***/ }),
+
+/***/ "../lambdas/_common/indicators/ema.ts":
+/*!********************************************!*\
+  !*** ../lambdas/_common/indicators/ema.ts ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.calculateEMA = exports.emaArray = exports.ema = void 0;
+var sma_1 = __webpack_require__(/*! ./sma */ "../lambdas/_common/indicators/sma.ts");
+var attributeIndex = {
+    open: 1,
+    close: 2,
+    high: 3,
+    low: 4,
+    volume: 5
+};
+function ema(data, period, attr) {
+    if (attr === void 0) { attr = 'close'; }
+    return calculateEMA(data, function (c) { return c[attributeIndex[attr]]; }, period);
+}
+exports.ema = ema;
+function emaArray(data, period) {
+    return calculateEMA(data, function (v) { return v; }, period);
+}
+exports.emaArray = emaArray;
+function calculateEMA(data, accessor, period) {
+    var results = sma_1.calculateSMA(data.slice(0, period), accessor, period);
+    var exponent = (2 / (period + 1));
+    for (var i = period; i < data.length; i++) {
+        results.push(accessor(data[i]) * exponent +
+            results[i - 1] * (1 - exponent));
+    }
+    return results;
+}
+exports.calculateEMA = calculateEMA;
+
+
+/***/ }),
+
+/***/ "../lambdas/_common/indicators/keltner.ts":
+/*!************************************************!*\
+  !*** ../lambdas/_common/indicators/keltner.ts ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.keltner = void 0;
+var atr_1 = __webpack_require__(/*! ./atr */ "../lambdas/_common/indicators/atr.ts");
+var ema_1 = __webpack_require__(/*! ./ema */ "../lambdas/_common/indicators/ema.ts");
+function keltner(data, options, attr) {
+    var _a = __assign({ maPeriod: 20, atrPeriod: 10, bandMultiplier: 1 }, (options || {})), maPeriod = _a.maPeriod, atrPeriod = _a.atrPeriod, bandMultiplier = _a.bandMultiplier;
+    var emaData = ema_1.ema(data, maPeriod, attr);
+    var atrData = atr_1.atr(data, atrPeriod);
+    return emaData.map(function (ema, i) { return ({
+        middle: ema,
+        upper: ema + (bandMultiplier * atrData[i]),
+        lower: ema - (bandMultiplier * atrData[i])
+    }); });
+}
+exports.keltner = keltner;
+
+
+/***/ }),
+
 /***/ "../lambdas/_common/indicators/sma.ts":
 /*!********************************************!*\
   !*** ../lambdas/_common/indicators/sma.ts ***!
@@ -420,48 +615,190 @@ var baseLevels = [1000000, 1009889, 1019875, 1029960, 1040145, 1050431, 1060818,
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.smaArray = exports.sma = void 0;
+exports.calculateSMA = exports.smaArray = exports.sma = void 0;
 var attributeIndex = {
     open: 1,
     close: 2,
-    hight: 3,
+    high: 3,
     low: 4,
     volume: 5
 };
 function sma(data, period, attr) {
     if (attr === void 0) { attr = 'close'; }
-    var sum = 0;
-    var length = data.length;
-    var values = new Array(length);
-    var attrIndex = attributeIndex[attr];
-    for (var i = 0; i < period; i++) {
-        sum += data[i][attrIndex];
-        values[i] = 0;
-    }
-    values[period - 1] = sum / period;
-    for (var i = period; i < length; i++) {
-        sum += data[i][attrIndex] - data[i - period][attrIndex];
-        values[i] = sum / period;
-    }
-    return values;
+    return calculateSMA(data, function (candle) { return candle[attributeIndex[attr]]; }, period);
 }
 exports.sma = sma;
 function smaArray(data, period) {
+    return calculateSMA(data, function (value) { return value; }, period);
+}
+exports.smaArray = smaArray;
+function calculateSMA(data, accessor, period) {
     var sum = 0;
     var length = data.length;
     var values = new Array(length);
     for (var i = 0; i < period; i++) {
-        sum += data[i];
+        sum += accessor(data[i]);
         values[i] = 0;
     }
     values[period - 1] = sum / period;
     for (var i = period; i < length; i++) {
-        sum += data[i] - data[i - period];
+        sum += accessor(data[i]) - accessor(data[i - period]);
         values[i] = sum / period;
     }
     return values;
 }
-exports.smaArray = smaArray;
+exports.calculateSMA = calculateSMA;
+
+
+/***/ }),
+
+/***/ "../lambdas/_common/indicators/topbot.ts":
+/*!***********************************************!*\
+  !*** ../lambdas/_common/indicators/topbot.ts ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.topbot = void 0;
+function topbot(data) {
+    var tops = [0];
+    var bottoms = [0];
+    for (var i = 2; i < data.length; i++) {
+        var current = data[i];
+        var prev = data[i - 1];
+        var pprev = data[i - 2];
+        if (prev[3] > current[3] && prev[3] > pprev[3]) {
+            var value = Math.max(pprev[3], getTop(prev));
+            tops.push(value);
+            bottoms.push(0);
+        }
+        else if (prev[4] < current[4] && prev[4] < pprev[4]) {
+            var value = Math.min(pprev[4], getBottom(prev));
+            bottoms.push(value);
+            tops.push(0);
+        }
+        else {
+            tops.push(0);
+            bottoms.push(0);
+        }
+    }
+    removeDoubles(tops, bottoms);
+    // console.log( 'Before cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
+    removeNoise(tops, bottoms, getNoiseThreshold(tops, bottoms));
+    // console.log( 'After cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
+    // console.log( 'Returning tops and bottoms')
+    return { tops: tops, bottoms: bottoms };
+}
+exports.topbot = topbot;
+function getTop(prev) {
+    // (high + max(open,close)) / 2
+    return (prev[3] + prev[prev[1] > prev[2] ? 1 : 2]) / 2;
+}
+function getBottom(prev) {
+    // (low + min(open,close)) / 2
+    return (prev[4] + prev[prev[1] > prev[2] ? 2 : 1]) / 2;
+}
+// Cleans consecutive tops/bottoms
+// Cleans shakes (consecutive top,bottom,top or bottom,top,bottom )
+function removeDoubles(tops, bottoms) {
+    var lastAngleType = '';
+    var lastAngleValue = 0;
+    var lastAngleIndex = 0;
+    tops.forEach(function (top, i) {
+        if (top) {
+            if (lastAngleType === 't') {
+                // console.log('Replacing a top', lastAngleIndex);
+                if (lastAngleValue > top) {
+                    tops[i] = 0;
+                }
+                else {
+                    tops[lastAngleIndex] = 0;
+                    lastAngleIndex = i;
+                    lastAngleValue = top;
+                }
+            }
+            else {
+                lastAngleIndex = i;
+                lastAngleValue = top;
+            }
+            lastAngleType = 't';
+        }
+        if (bottoms[i]) {
+            if (lastAngleType === 'b') {
+                // console.log('Replacing a bottom', lastAngleIndex, lastAngleValue, bottoms);
+                if (lastAngleValue < bottoms[i]) {
+                    bottoms[i] = 0;
+                }
+                else {
+                    bottoms[lastAngleIndex] = 0;
+                    lastAngleIndex = i;
+                    lastAngleValue = bottoms[i];
+                }
+            }
+            else {
+                lastAngleIndex = i;
+                lastAngleValue = bottoms[i];
+            }
+            lastAngleType = 'b';
+        }
+    });
+}
+function getNoiseThreshold(tops, bottoms) {
+    var lastValue = 0;
+    var variations = [];
+    var sum = 0;
+    tops.forEach(function (top, i) {
+        if (top) {
+            if (!lastValue)
+                return (lastValue = top);
+            var v = top / lastValue;
+            sum += v;
+            variations.push(v);
+            lastValue = top;
+        }
+        else if (bottoms[i]) {
+            if (!lastValue)
+                return (lastValue = bottoms[i]);
+            var v = lastValue / bottoms[i];
+            sum += v;
+            variations.push(v);
+            lastValue = bottoms[i];
+        }
+    });
+    var avg = sum / variations.length;
+    var sdSum = 0;
+    variations.forEach(function (v) {
+        sdSum += Math.pow(v - avg, 2);
+    });
+    var sd = Math.sqrt(sdSum / variations.length);
+    return avg - sd;
+}
+function removeNoise(tops, bottoms, threshold) {
+    var i = tops.length;
+    var lastValueIndex = 0;
+    while (i-- > 0) {
+        if (tops[i]) {
+            if (lastValueIndex) {
+                if (tops[i] / bottoms[lastValueIndex] < threshold) {
+                    bottoms[lastValueIndex] = 0;
+                }
+            }
+            lastValueIndex = i;
+        }
+        else if (bottoms[i]) {
+            if (lastValueIndex) {
+                if (tops[lastValueIndex] / bottoms[i] < threshold) {
+                    tops[lastValueIndex] = 0;
+                }
+            }
+            lastValueIndex = i;
+        }
+    }
+    return removeDoubles(tops, bottoms);
+}
 
 
 /***/ }),
@@ -869,7 +1206,7 @@ var Trader = /** @class */ (function () {
     };
     Trader.prototype.placeOrder = function (orderInput) {
         var _a;
-        var order = __assign(__assign({ price: null }, orderInput), { id: uuid(), status: 'pending', foreignId: null, errorReason: null, executedPrice: null, createdAt: Date.now(), placedAt: null, closedAt: null, marketPrice: this.prices[orderInput.pair] });
+        var order = __assign(__assign({}, orderInput), { price: orderInput.price || null, id: uuid(), status: 'pending', foreignId: null, errorReason: null, executedPrice: null, createdAt: Date.now(), placedAt: null, closedAt: null, marketPrice: this.prices[orderInput.pair] });
         this.ordersToPlace.push(order);
         this.orders = __assign(__assign({}, this.orders), (_a = {}, _a[order.id] = order, _a));
         return __assign({}, order);
@@ -895,6 +1232,7 @@ var Trader = /** @class */ (function () {
         return total;
     };
     Trader.prototype.getPrice = function (pair) {
+        console.log('PRICEs', this.prices);
         return this.prices[pair];
     };
     return Trader;

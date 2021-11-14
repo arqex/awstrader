@@ -20,8 +20,6 @@ export default class BacktestDetailsScreen extends React.Component<BacktestDetai
 		const {data:bt} = fullBacktestLoader(this.props.backtestId);
 		if( !bt || !bt.fullResults ) return <span>Loading...</span>;
 
-
-		console.log( bt );
 		return (
 			<ScreenWrapper title="Backtest">
 				<div className={styles.container}>
@@ -73,7 +71,6 @@ export default class BacktestDetailsScreen extends React.Component<BacktestDetai
 	}
 
 	renderOrders(bt: StoreBacktest){
-		console.log(bt);
 		if( !bt.fullResults?.deploymentDetails ){
 			return (
 				<div className={styles.container}>

@@ -1,13 +1,26 @@
 import memoizeOne from "memoize-one";
-import { ChartCandle } from "./TradingChart";
 import { ema, wma, sma, tma, rsi } from "@react-financial-charts/indicators";
 import { Coords } from "../../../../lambdas/_common/botRunner/botRunPlotter";
+import { topbot } from "../../../../lambdas/_common/indicators/topbot";
+import { ArrayCandle } from "../../../../lambdas/lambda.types";
 
 
-const indicatorFunctions: {[name:string]: Function} = { sma, ema, wma, tma, rsi };
+const indicatorFunctions: {[name:string]: Function} = { sma, ema, wma, tma, rsi, topbot };
 export const colors = ['#ff0000', '#ffff00', '#00dd22', '#00ffff', '#0000ff', '#ff99cc'];
+export interface ChartDataItem {
+	0: number, // candle time
+	1: number, // candle open
+	2: number, // candle close
+	3: number, // candle high
+	4: number, // candle low
+	5: number, // candle volume
+	calculated: {
+		[key: string]: any
+	}
+}
 
-export interface ChartData extends ChartCandle {
+export interface ChartData {
+	candle: ArrayCandle,
 	calculated: {
 		[key: string]: number
 	}
@@ -26,26 +39,34 @@ export interface DrawingIndices {startIndex: number | undefined, endIndex: numbe
 
 
 // Cache accessor to always pass the same object to the components
-let cachedAccessors: {[key: string]: (d:ChartData) => number} = {};
+let cachedAccessors: {[key: string]: (d:ChartDataItem) => number} = {};
+
+const attributeIndex: {[key:string]: number} = {
+	time: 0,
+	open: 1,
+	close: 2,
+	high: 3,
+	low: 4,
+	volume: 5
+}
 
 const chartUtils = {
-	xAccessor(d: ChartCandle){
-		return d.date;
+	xAccessor(d: ChartDataItem){
+		return d[0];
 	},
 
 	getYAccessor(key: string){
 		if(cachedAccessors[key]) return cachedAccessors[key];
 
-		if( ['open', 'close', 'high', 'low', 'volume'].includes(key) ){
-			cachedAccessors[key] = function(d: ChartData){
-				// @ts-ignore
-				return d[key];
+		if( attributeIndex[key] !== undefined ){
+			let attr = attributeIndex[key]
+			cachedAccessors[key] = function(d: ChartDataItem){
+				// @ts-ignore number can actually index the ChartDataItem
+				return d[attr];
 			}
 		}
 		else {
-			cachedAccessors[key] = function(d: ChartData){
-				// @ts-ignore
-				console.log(key);
+			cachedAccessors[key] = function(d: ChartDataItem){
 				return d.calculated[key];
 			}
 		}
@@ -110,8 +131,13 @@ const chartUtils = {
 		return indicators;
 	}),
 
-	candleAccessor(d: ChartCandle ){
-		return d;
+	candleAccessor(item: ChartDataItem){
+		return {
+			open: item[1],
+			close: item[2],
+			high: item[3],
+			low: item[4]
+		}
 	},
 
 	getFormat( quantity: number ){
@@ -199,7 +225,7 @@ const chartUtils = {
 
 // Check if calculated is defined before setting the key
 function getMerger( key: string ) {
-	return function( data: ChartData, value: number ){
+	return function( data: ChartDataItem, value: number ){
 		data.calculated[key] = value;
 	}
 }

@@ -90,6 +90,10 @@ interface Indicators {
 	vma( candleData: ArrayCandle[], period: number ): number[]
 	/** Calculates the Relative Strength Index for an array of candle data. */
 	rsi( candleData: ArrayCandle, period: number): number[]
+
+	bollinger( candleData: ArrayCandle[] )
+	keltner( candleData: ArrayCandle[] )
+	topbot( candleData: ArrayCandle[] )
 }
 
 interface Patterns {

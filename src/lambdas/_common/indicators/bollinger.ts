@@ -28,7 +28,6 @@ export function bollinger(data: ArrayCandle[], options?: BollingerBandsOptions )
 export function calculateStandardDeviation(prices: number[], smaData: number[], period: number ) {
 	let result: number[] = [];
 
-	//console.log('SMA', smaData);
 	smaData.forEach( (avg, i) => {
 		if( !avg ) return result.push(avg);
 

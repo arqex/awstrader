@@ -1,5 +1,8 @@
 import { ArrayCandle } from "../../lambda.types";
+import { bollinger } from "../indicators/bollinger";
+import { keltner } from "../indicators/keltner";
 import { sma, smaArray } from "../indicators/sma";
+import { topbot } from "../indicators/topbot";
 
 
 type CandleAttribute = 'open' | 'close' | 'high' | 'low' | 'volume';
@@ -15,6 +18,7 @@ export interface Indicators {
 
 	bollinger( candleData: ArrayCandle[] )
 	keltner( candleData: ArrayCandle[] )
+	topbot( candleData: ArrayCandle[] )
 }
 
 
@@ -46,5 +50,18 @@ export class BotRunIndicators implements Indicators {
 	smaArray( candleData: number[], period: number) {
 		// This indicator can't be displayed in the charts, don't store in the used ones
 		return smaArray(candleData, period);
+	}
+
+	bollinger( candleData: ArrayCandle[] ){
+		return bollinger(candleData);
+	}
+
+	keltner( candleData: ArrayCandle[] ){
+		return keltner(candleData);
+	}
+
+	topbot( candleData: ArrayCandle[] ){
+		this.indicatorsUsed[`topbot`] = true;
+		return topbot(candleData);
 	}
 }

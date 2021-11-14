@@ -50,7 +50,7 @@ export default class AutoChart extends React.Component<AutoChartProps> {
 			// @ts-ignore // HOCs are breaking the component props ts definitions
 			<TradingChart
 				orders={this.props.orders}
-				candles={ getChartCandles(candles) }
+				candles={ candles }
 				plotterData={this.getPlotterData()}
 				patterns={ this.props.patterns || [] }
 				onLoadMore={ this._onLoadMore }
@@ -140,21 +140,6 @@ export default class AutoChart extends React.Component<AutoChartProps> {
 
 	_onLoadMore = (start:number, end: number) => {
 		this.setState({chartStartDate: start});
-	}
-}
-
-const getChartCandles = memoizeOne( (candles: ArrayCandle[]) => {
-	return candles.map( toChartCandle );
-});
-
-function toChartCandle( c: ArrayCandle ): ChartCandle{
-	return {
-		date: c[0],
-		open: c[1],
-		close: c[2],
-		high: c[3],
-		low: c[4],
-		volume: c[5]
 	}
 }
 

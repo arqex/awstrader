@@ -1,17 +1,16 @@
 import * as React from 'react'
-import { ChartCandle } from '../TradingChart';
 
 import { ChartCanvas } from '@react-financial-charts/core';
 import { withSize, withDeviceRatio } from '@react-financial-charts/utils';
 
 import {scaleTime} from 'd3-scale';
-import chartUtils from '../chartUtils';
+import chartUtils, { ChartDataItem } from '../chartUtils';
 
 interface ChartXProps {
 	width: number,
 	height: number,
 	ratio: number,
-	candles?: ChartCandle[], // Candles are not optional, but couldn't make it work with `withSize,withDeviceRatio` any other way
+	candles?: ChartDataItem[], // Candles are not optional, but couldn't make it work with `withSize,withDeviceRatio` any other way
 	initialCandlesInView?: number,
 	onLoadMore?: (start: number, end: number ) => void,
 }
@@ -24,8 +23,8 @@ class ChartX extends React.Component<ChartXProps> {
 	margins = { left: 50, right: 50, top: 10, bottom: 30 }
 
 	render() {
-		const { width, ratio, height, children} = this.props;
-		const candles = this.getCandles();
+		const {width, ratio, height, children} = this.props;
+		const dataItems = this.getDataItems();
 
 		return (
 			<ChartCanvas
@@ -33,7 +32,7 @@ class ChartX extends React.Component<ChartXProps> {
 				width={width}
 				height={height}
 				ratio={ratio}
-				data={candles}
+				data={dataItems}
 				xAccessor={chartUtils.xAccessor}
 				xScale={this.scale}
 				xExtents={this.getExtents()}
@@ -47,7 +46,7 @@ class ChartX extends React.Component<ChartXProps> {
 
 	getExtents(){
 		if( !this.extentsInitialized ){
-			let candles = this.getCandles();
+			let candles = this.getDataItems();
 			let {initialCandlesInView = 140} = this.props;
 			this.extents = [
 				chartUtils.xAccessor(candles.slice(-1)[0]),
@@ -58,7 +57,7 @@ class ChartX extends React.Component<ChartXProps> {
 		return this.extents;
 	}
 
-	getCandles(): ChartCandle[]{
+	getDataItems(): ChartDataItem[]{
 		return this.props.candles || [];
 	}
 }
