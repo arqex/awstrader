@@ -1,13 +1,21 @@
 import { ArrayCandle } from "../../lambda.types";
 
-export function topbot(data: ArrayCandle[]){
+export interface TopbotChartOptions {
+	candleGrouping: number
+}
+
+
+export function topbot(data: ArrayCandle[], options?: TopbotChartOptions){
+	const {candleGrouping} = options || {candleGrouping: 1};
+	const candles = candleGrouping > 1 ? groupCandles( data, candleGrouping ) : data;
+
 	let tops = [0];
 	let bottoms = [0];
 
-	for(let i = 2; i<data.length; i++){
-		let current = data[i];
-		let prev = data[i-1];
-		let pprev = data[i-2];
+	for(let i = 2; i<candles.length; i++){
+		let current = candles[i];
+		let prev = candles[i-1];
+		let pprev = candles[i-2];
 
 		if( prev[3] > current[3] && prev[3] > pprev[3] ){
 			let value = Math.max(pprev[3], getTop(prev));
@@ -27,8 +35,12 @@ export function topbot(data: ArrayCandle[]){
 
 	removeDoubles( tops, bottoms );
 
+	if( candleGrouping > 1 ){
+		return locateGroupedTopbots(data, tops, bottoms, candleGrouping);
+	}
+
 	// console.log( 'Before cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
-	removeNoise( tops, bottoms, getNoiseThreshold(tops, bottoms) );
+	// removeNoise( tops, bottoms, getNoiseThreshold(tops, bottoms) );
 
 	// console.log( 'After cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
 	// console.log( 'Returning tops and bottoms')
@@ -36,14 +48,14 @@ export function topbot(data: ArrayCandle[]){
 }
 
 
-function getTop( prev ){
+function getTop( candle ){
 	// (high + max(open,close)) / 2
-	return (prev[3] + prev[ prev[1] > prev[2] ? 1 : 2]) / 2;
+	return (candle[3] + candle[ candle[1] > candle[2] ? 1 : 2]) / 2;
 }
 
-function getBottom( prev ){
+function getBottom( candle ){
 	// (low + min(open,close)) / 2
-	return (prev[4] + prev[ prev[1] > prev[2] ? 2 : 1]) / 2;
+	return (candle[4] + candle[ candle[1] > candle[2] ? 2 : 1]) / 2;
 }
 
 
@@ -59,9 +71,11 @@ function removeDoubles( tops, bottoms ){
 			if( lastAngleType === 't' ){
 				// console.log('Replacing a top', lastAngleIndex);
 				if( lastAngleValue > top ){
+					// console.log(`1. Removing a top at ${top} keeping it at ${lastAngleValue}`);
 					tops[i] = 0;
 				}
 				else {
+					// console.log(`2. Removing a top at ${lastAngleValue} keeping it at ${top}`);
 					tops[lastAngleIndex] = 0;
 					lastAngleIndex = i;
 					lastAngleValue = top;
@@ -75,11 +89,12 @@ function removeDoubles( tops, bottoms ){
 		}
 		if( bottoms[i] ){
 			if( lastAngleType === 'b') {
-				// console.log('Replacing a bottom', lastAngleIndex, lastAngleValue, bottoms);
 				if( lastAngleValue < bottoms[i] ){
+					// console.log(`1. Removing a bottom at ${bottoms[i]} keeping it at ${lastAngleValue}`);
 					bottoms[i] = 0;
 				}
 				else {
+					// console.log(`2. Removing a bottom at ${lastAngleValue} keeping it at ${bottoms[i]}`);
 					bottoms[lastAngleIndex] = 0;
 					lastAngleIndex = i;
 					lastAngleValue = bottoms[i];
@@ -150,4 +165,111 @@ function removeNoise( tops, bottoms, threshold ){
 	}
 
 	return removeDoubles(tops, bottoms);
+}
+
+function groupCandles( candles: ArrayCandle[], amount: number ){
+	let grouped: ArrayCandle[] = [];
+	let i = 0;
+	while( i < candles.length ){
+		grouped.push( groupCandle(candles, i, i+amount) );
+		i += amount;
+	}
+	return grouped;
+}
+
+function groupCandle( candles: ArrayCandle[], startIndex, endIndex ): ArrayCandle {
+	let low = Infinity;
+	let high = -Infinity;
+	let i = startIndex;
+	let volume = 0;
+	while( i < endIndex ){
+		if( candles[i] ){
+			if( candles[i][3] > high ){
+				high = candles[i][3];
+			}
+			if( candles[i][4] < low ){
+				low = candles[i][4];
+			}
+			volume += candles[i][5];
+			i++;
+		}
+	}
+
+	return [
+		candles[startIndex][0], // time
+		candles[startIndex][1], // open
+		candles[endIndex-1][2], // close
+		high,
+		low,
+		volume
+	];
+}
+
+function locateGroupedTopbots( data: ArrayCandle[], tops, bottoms, groupSize ){
+	let ungroupedTops: number[] = [];
+	let ungroupedBottoms: number[] = [];
+
+	tops.forEach( (top, i) => {
+		if( top ){
+			let j = i*groupSize;
+			let max = -Infinity;
+			let maxIndex = j;
+			while( j < (i+1)*groupSize ){
+				if( data[j] && data[j][3] > max ){
+					max = data[j][3];
+					maxIndex = j;
+				}
+				j++;
+			}
+
+			j = i*groupSize;
+			while( j < (i+1)*groupSize ){
+				if( j === maxIndex ){
+					ungroupedTops.push( getTop(data[j]) )
+				}
+				else {
+					ungroupedTops.push( 0 );
+				}
+				ungroupedBottoms.push( 0 );
+				j++;
+			}
+		}
+		else if( bottoms[i] ){
+			let j = i*groupSize;
+			let min = Infinity;
+			let minIndex = j;
+			while( j < (i+1)*groupSize ){
+				if( data[j] && data[j][4] < min ){
+					min = data[j][4];
+					minIndex = j;
+				}
+				j++;
+			}
+
+			j = i*groupSize;
+			while( j < (i+1)*groupSize ){
+				if( j === minIndex ){
+					ungroupedBottoms.push( getBottom(data[j]) )
+				}
+				else {
+					ungroupedBottoms.push( 0 );
+				}
+				ungroupedTops.push( 0 );
+				j++;
+			}
+		}
+		else {
+			let j = i*groupSize;
+			while( j < (i+1)*groupSize ){
+				ungroupedTops.push( 0 );
+				ungroupedBottoms.push( 0 );
+				j++;
+			}
+		}
+	});
+
+	return {
+		tops: ungroupedTops,
+		bottoms: ungroupedBottoms
+	}
 }

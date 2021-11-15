@@ -3,12 +3,15 @@ function initializeState(config, state ){
     state.currentSellId = '';
 }
 
-function onData({ config, state, trader }: BotInput) {
+function onData({ config, state, trader, indicators, candleData }: BotInput) {
     const {currentBuyId, currentSellId } = state;
-    const currentPrice = trader.getPrice('LUNA/BTC');
+    const pair = config.pairs[0];
+    const currentPrice = trader.getPrice(pair);
+
+    const topbot = indicators.topbot(candleData[pair])
 
     if( !currentBuyId && !currentSellId ){
-        placeBuy( state, trader, currentPrice );
+        placeBuy( pair, state, trader, currentPrice );
     }
 
     if( currentBuyId ){
@@ -16,11 +19,11 @@ function onData({ config, state, trader }: BotInput) {
         if( order ){
             if( order.status === 'completed' ){
                 state.currentBuyId = '';
-                placeSell( state, trader, currentPrice );
+                placeSell( pair, state, trader, currentPrice );
             }
         }
         else {
-            placeBuy( state, trader, currentPrice );
+            placeBuy( pair, state, trader, currentPrice );
         }
     }
     else if( currentSellId ){
@@ -28,31 +31,31 @@ function onData({ config, state, trader }: BotInput) {
         if( order ){
             if( order.status === 'completed' ){
                 state.curretnSellId = '';
-                placeBuy( state, trader, currentPrice );
+                placeBuy( pair, state, trader, currentPrice );
             }
         }
         else {
-            placeSell( state, trader, currentPrice );
+            placeSell( pair, state, trader, currentPrice );
         }
     }
 }
 
 
-function placeBuy( state, trader: Trader, currentPrice: number ) {
+function placeBuy( pair, state, trader: Trader, currentPrice: number ) {
     const buyPrice = currentPrice * .99;
 
     const order = trader.placeOrder({
         type: 'limit',
         direction: 'buy',
         price: buyPrice,
-        pair: 'LUNA/BTC',
+        pair: pair,
         amount: trader.getBalance('BTC').free * .1 / currentPrice
     });
 
     state.currentBuyId = order.id;
 }
 
-function placeSell( state, trader: Trader, currentPrice: number ){
+function placeSell( pair, state, trader: Trader, currentPrice: number ){
     const sellPrice = currentPrice * 1.01;
     const portfolio = trader.getPortfolio();
 
@@ -61,7 +64,7 @@ function placeSell( state, trader: Trader, currentPrice: number ){
         type: 'limit',
         direction: 'sell',
         price: sellPrice,
-        pair: 'LUNA/BTC',
+        pair: pair,
         amount: trader.getBalance('LUNA').free
     });
 

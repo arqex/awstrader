@@ -112,6 +112,7 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 					yAccessor={ chartUtils.candleAccessor }
 					{...this.getCandleStyles('#d05773', '#29946d') } />
 				{ this.renderMouseCoordinates() }
+				{ this.renderCandleIndicators(plotterData?.indicators) }
 				{ this.renderIndicatorLineSeries( indicators )}
 				<OrderSeries orders={orders} candles={candles} />
 				{ this.renderPoints(plotterData.points) }
@@ -240,6 +241,14 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 		}
 	}
 
+	renderCandleIndicators(sources: string[]){
+		let renderedIndicators: any[] = [];
+		chartUtils.getDrawableIndicators(this.id, sources).forEach( (ind,i) => {
+			renderedIndicators.push( `ind${i}`, ind.render(`ind${i}`, {}) )
+		});
+		return (<>{renderedIndicators}</>);
+	}
+
 	renderIndicatorLineSeries(indicators: RunnableIndicator[]) {
 		if( !indicators.length ) return;
 
@@ -276,7 +285,7 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 
 	getChartData(): ChartDataItem[]{
 		const {candles, plotterData} = this.props; 
-		return augmentData( candles, plotterData?.indicators );
+		return augmentData( this.id, candles, plotterData?.indicators );
 	}
 
 	getPriceFormat(){
@@ -309,15 +318,15 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 	}
 }
 
-const augmentData = memoizeOne( (candles: ArrayCandle[], indicators?: string[] ): ChartDataItem[] => {
+const augmentData = memoizeOne( (chartId: string, candles: ArrayCandle[], indicators?: string[] ): ChartDataItem[] => {
 	let augmented: ChartDataItem[] = candles.map( candle => ({...candle, calculated:{}}) );
 
 	if( !indicators || !indicators.length ){
 		return augmented;
 	}
 	
-	chartUtils.getRunnableIndicators(indicators).forEach( (ind) => {
-		augmented = ind.func(augmented);
+	chartUtils.getDrawableIndicators(chartId, indicators).forEach( (ind) => {
+		augmented = ind.augmentData(augmented);
 	})
 
 	return augmented;

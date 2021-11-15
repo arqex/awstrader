@@ -3,6 +3,8 @@ import { ema, wma, sma, tma, rsi } from "@react-financial-charts/indicators";
 import { Coords } from "../../../../lambdas/_common/botRunner/botRunPlotter";
 import { topbot } from "../../../../lambdas/_common/indicators/topbot";
 import { ArrayCandle } from "../../../../lambdas/lambda.types";
+import { ChartIndicator } from "./indicators/ChartIndicator";
+import { TopbotChartIndicator } from "./indicators/TopbotChartIndicator";
 
 
 const indicatorFunctions: {[name:string]: Function} = { sma, ema, wma, tma, rsi, topbot };
@@ -72,6 +74,14 @@ const chartUtils = {
 		}
 
 		return cachedAccessors[key];
+	},
+
+	getDrawableIndicators: (chartId: string, sources: string[] | undefined ) => {
+		let indicators: ChartIndicator[] = [];
+		if( !sources ) return indicators;
+
+		// ChartId is only used to memoize indicators for the same chart
+		return memoGetDrawableIndicators( chartId, JSON.stringify(sources) );
 	},
 
 	getRunnableIndicators: memoizeOne( (sources: string[] | undefined ) => {
@@ -229,5 +239,24 @@ function getMerger( key: string ) {
 		data.calculated[key] = value;
 	}
 }
+
+
+const memoGetDrawableIndicators = memoizeOne( (chartId: string, sourcesStr: string) => {
+	let indicators: ChartIndicator[] = [];
+	let sources: string[] = JSON.parse(sourcesStr);
+
+	sources.forEach( s => {
+		let [type, ...args] = s.split('|');
+
+		if( type === 'topbot' ){
+			indicators.push( new TopbotChartIndicator() );
+		}
+		else {
+			console.error('Unknown indicator type', type);
+		}
+	});
+
+	return indicators;
+})
 
 export default chartUtils;
