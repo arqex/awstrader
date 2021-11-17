@@ -17,12 +17,14 @@ export function topbot(data: ArrayCandle[], options?: TopbotChartOptions){
 		let prev = candles[i-1];
 		let pprev = candles[i-2];
 
-		if( prev[3] > current[3] && prev[3] > pprev[3] ){
+		// the prev candle need to be greater than pprev and current, or greater than pprev and equals than current but current is bearish
+		if( (prev[3] > current[3] || (prev[3] === current[3] && current[2] < current[1])) && prev[3] > pprev[3] ){
 			let value = Math.max(pprev[3], getTop(prev));
 			tops.push( value );
 			bottoms.push(0);
 		}
-		else if( prev[4] < current[4] && prev[4] < pprev[4] ){
+		// the prev candle need to be smaller than pprev and current, or smaller than pprev and equals than current but current is bullish
+		else if( (prev[4] < current[4] || (prev[4] === prev[3] && current[1] < current[2])) && prev[4] < pprev[4] ){
 			let value = Math.min(pprev[4], getBottom(prev));
 			bottoms.push( value );
 			tops.push(0);
@@ -33,11 +35,15 @@ export function topbot(data: ArrayCandle[], options?: TopbotChartOptions){
 		}
 	}
 
-	removeDoubles( tops, bottoms );
-
 	if( candleGrouping > 1 ){
 		return locateGroupedTopbots(data, tops, bottoms, candleGrouping);
 	}
+
+	filterTops(tops);
+	filterBottoms(bottoms);
+
+
+	removeDoubles( tops, bottoms );
 
 	// console.log( 'Before cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
 	// removeNoise( tops, bottoms, getNoiseThreshold(tops, bottoms) );
@@ -272,4 +278,54 @@ function locateGroupedTopbots( data: ArrayCandle[], tops, bottoms, groupSize ){
 		tops: ungroupedTops,
 		bottoms: ungroupedBottoms
 	}
+}
+
+
+function filterTops( tops ){
+	let prevValue = -Infinity;
+	let prevIndex: number;
+
+	tops.forEach( (top, i) => {
+		if( top ){
+			if( prevIndex === undefined ){
+				prevIndex = i;
+				prevValue = top
+			}
+			else {
+				if( top > prevValue ){
+					tops[prevIndex] = 0;
+				}
+				else {
+					tops[i] = 0;
+				}
+				prevIndex = i;
+				prevValue = top;
+			}
+		}
+	})
+}
+
+function filterBottoms(bottoms: number[]){
+	let prevValue = Infinity;
+	let prevIndex: number;
+
+	bottoms.forEach( (bottom, i) => {
+		if( bottom ){
+			if( prevIndex === undefined ){
+				prevIndex = i;
+				prevValue = bottom
+			}
+			else {
+				if( bottom < prevValue ){
+					bottoms[prevIndex] = 0;
+				}
+				else {
+					bottoms[i] = 0;
+				}
+				prevIndex = i;
+				prevValue = bottom;
+			}
+		}
+	})
+
 }

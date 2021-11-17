@@ -249,7 +249,7 @@ const memoGetDrawableIndicators = memoizeOne( (chartId: string, sourcesStr: stri
 		let [type, ...args] = s.split('|');
 
 		if( type === 'topbot' ){
-			indicators.push( new TopbotChartIndicator() );
+			indicators.push( new TopbotChartIndicator( args ) );
 		}
 		else {
 			console.error('Unknown indicator type', type);

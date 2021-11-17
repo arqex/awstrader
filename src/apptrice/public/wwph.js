@@ -131,9 +131,9 @@ var BotRunIndicators = /** @class */ (function () {
     BotRunIndicators.prototype.keltner = function (candleData) {
         return keltner_1.keltner(candleData);
     };
-    BotRunIndicators.prototype.topbot = function (candleData) {
-        this.indicatorsUsed["topbot"] = true;
-        return topbot_1.topbot(candleData);
+    BotRunIndicators.prototype.topbot = function (candleData, options) {
+        this.indicatorsUsed["topbot|" + ((options === null || options === void 0 ? void 0 : options.candleGrouping) || 1)] = true;
+        return topbot_1.topbot(candleData, options);
     };
     return BotRunIndicators;
 }());
@@ -663,13 +663,15 @@ exports.calculateSMA = calculateSMA;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.topbot = void 0;
-function topbot(data) {
+function topbot(data, options) {
+    var candleGrouping = (options || { candleGrouping: 1 }).candleGrouping;
+    var candles = candleGrouping > 1 ? groupCandles(data, candleGrouping) : data;
     var tops = [0];
     var bottoms = [0];
-    for (var i = 2; i < data.length; i++) {
-        var current = data[i];
-        var prev = data[i - 1];
-        var pprev = data[i - 2];
+    for (var i = 2; i < candles.length; i++) {
+        var current = candles[i];
+        var prev = candles[i - 1];
+        var pprev = candles[i - 2];
         if (prev[3] > current[3] && prev[3] > pprev[3]) {
             var value = Math.max(pprev[3], getTop(prev));
             tops.push(value);
@@ -686,20 +688,23 @@ function topbot(data) {
         }
     }
     removeDoubles(tops, bottoms);
+    if (candleGrouping > 1) {
+        return locateGroupedTopbots(data, tops, bottoms, candleGrouping);
+    }
     // console.log( 'Before cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
-    removeNoise(tops, bottoms, getNoiseThreshold(tops, bottoms));
+    // removeNoise( tops, bottoms, getNoiseThreshold(tops, bottoms) );
     // console.log( 'After cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
     // console.log( 'Returning tops and bottoms')
     return { tops: tops, bottoms: bottoms };
 }
 exports.topbot = topbot;
-function getTop(prev) {
+function getTop(candle) {
     // (high + max(open,close)) / 2
-    return (prev[3] + prev[prev[1] > prev[2] ? 1 : 2]) / 2;
+    return (candle[3] + candle[candle[1] > candle[2] ? 1 : 2]) / 2;
 }
-function getBottom(prev) {
+function getBottom(candle) {
     // (low + min(open,close)) / 2
-    return (prev[4] + prev[prev[1] > prev[2] ? 2 : 1]) / 2;
+    return (candle[4] + candle[candle[1] > candle[2] ? 2 : 1]) / 2;
 }
 // Cleans consecutive tops/bottoms
 // Cleans shakes (consecutive top,bottom,top or bottom,top,bottom )
@@ -712,9 +717,11 @@ function removeDoubles(tops, bottoms) {
             if (lastAngleType === 't') {
                 // console.log('Replacing a top', lastAngleIndex);
                 if (lastAngleValue > top) {
+                    // console.log(`1. Removing a top at ${top} keeping it at ${lastAngleValue}`);
                     tops[i] = 0;
                 }
                 else {
+                    // console.log(`2. Removing a top at ${lastAngleValue} keeping it at ${top}`);
                     tops[lastAngleIndex] = 0;
                     lastAngleIndex = i;
                     lastAngleValue = top;
@@ -728,11 +735,12 @@ function removeDoubles(tops, bottoms) {
         }
         if (bottoms[i]) {
             if (lastAngleType === 'b') {
-                // console.log('Replacing a bottom', lastAngleIndex, lastAngleValue, bottoms);
                 if (lastAngleValue < bottoms[i]) {
+                    // console.log(`1. Removing a bottom at ${bottoms[i]} keeping it at ${lastAngleValue}`);
                     bottoms[i] = 0;
                 }
                 else {
+                    // console.log(`2. Removing a bottom at ${lastAngleValue} keeping it at ${bottoms[i]}`);
                     bottoms[lastAngleIndex] = 0;
                     lastAngleIndex = i;
                     lastAngleValue = bottoms[i];
@@ -798,6 +806,105 @@ function removeNoise(tops, bottoms, threshold) {
         }
     }
     return removeDoubles(tops, bottoms);
+}
+function groupCandles(candles, amount) {
+    var grouped = [];
+    var i = 0;
+    while (i < candles.length) {
+        grouped.push(groupCandle(candles, i, i + amount));
+        i += amount;
+    }
+    return grouped;
+}
+function groupCandle(candles, startIndex, endIndex) {
+    var low = Infinity;
+    var high = -Infinity;
+    var i = startIndex;
+    var volume = 0;
+    while (i < endIndex) {
+        if (candles[i]) {
+            if (candles[i][3] > high) {
+                high = candles[i][3];
+            }
+            if (candles[i][4] < low) {
+                low = candles[i][4];
+            }
+            volume += candles[i][5];
+            i++;
+        }
+    }
+    return [
+        candles[startIndex][0],
+        candles[startIndex][1],
+        candles[endIndex - 1][2],
+        high,
+        low,
+        volume
+    ];
+}
+function locateGroupedTopbots(data, tops, bottoms, groupSize) {
+    var ungroupedTops = [];
+    var ungroupedBottoms = [];
+    tops.forEach(function (top, i) {
+        if (top) {
+            var j = i * groupSize;
+            var max = -Infinity;
+            var maxIndex = j;
+            while (j < (i + 1) * groupSize) {
+                if (data[j] && data[j][3] > max) {
+                    max = data[j][3];
+                    maxIndex = j;
+                }
+                j++;
+            }
+            j = i * groupSize;
+            while (j < (i + 1) * groupSize) {
+                if (j === maxIndex) {
+                    ungroupedTops.push(getTop(data[j]));
+                }
+                else {
+                    ungroupedTops.push(0);
+                }
+                ungroupedBottoms.push(0);
+                j++;
+            }
+        }
+        else if (bottoms[i]) {
+            var j = i * groupSize;
+            var min = Infinity;
+            var minIndex = j;
+            while (j < (i + 1) * groupSize) {
+                if (data[j] && data[j][4] < min) {
+                    min = data[j][4];
+                    minIndex = j;
+                }
+                j++;
+            }
+            j = i * groupSize;
+            while (j < (i + 1) * groupSize) {
+                if (j === minIndex) {
+                    ungroupedBottoms.push(getBottom(data[j]));
+                }
+                else {
+                    ungroupedBottoms.push(0);
+                }
+                ungroupedTops.push(0);
+                j++;
+            }
+        }
+        else {
+            var j = i * groupSize;
+            while (j < (i + 1) * groupSize) {
+                ungroupedTops.push(0);
+                ungroupedBottoms.push(0);
+                j++;
+            }
+        }
+    });
+    return {
+        tops: ungroupedTops,
+        bottoms: ungroupedBottoms
+    };
 }
 
 

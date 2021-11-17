@@ -93,7 +93,10 @@ interface Indicators {
 
 	bollinger( candleData: ArrayCandle[] )
 	keltner( candleData: ArrayCandle[] )
-	topbot( candleData: ArrayCandle[] )
+	topbot( candleData: ArrayCandle[], options?: TopbotChartOptions )
+}
+interface TopbotChartOptions {
+	candleGrouping: number
 }
 
 interface Patterns {

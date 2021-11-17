@@ -14,8 +14,10 @@ let idIndex = 0;
 export class TopbotChartIndicator implements ChartIndicator {
 	id: string
 	options: TopbotChartOptions
-	constructor( _options?: TopbotChartOptions){
-		this.options = _options || {candleGrouping: 4};
+	constructor( args: string[] ){
+		this.options = {
+			candleGrouping: args[0] ? parseInt(args[0]) : 1
+		}
 		this.id = `tb${idIndex++}`;
 	}
 
@@ -84,7 +86,7 @@ export class TopbotChartIndicator implements ChartIndicator {
 		if( !segments.length ) return;
 
 		ctx.save();
-		ctx.lineWidth = 3;
+		ctx.lineWidth = 1;
 		ctx.strokeStyle = 'red';
 
 		ctx.beginPath();

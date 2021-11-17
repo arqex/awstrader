@@ -2,7 +2,7 @@ import { ArrayCandle } from "../../lambda.types";
 import { bollinger } from "../indicators/bollinger";
 import { keltner } from "../indicators/keltner";
 import { sma, smaArray } from "../indicators/sma";
-import { topbot } from "../indicators/topbot";
+import { topbot, TopbotChartOptions } from "../indicators/topbot";
 
 
 type CandleAttribute = 'open' | 'close' | 'high' | 'low' | 'volume';
@@ -18,7 +18,7 @@ export interface Indicators {
 
 	bollinger( candleData: ArrayCandle[] )
 	keltner( candleData: ArrayCandle[] )
-	topbot( candleData: ArrayCandle[] )
+	topbot( candleData: ArrayCandle[], options?: TopbotChartOptions )
 }
 
 
@@ -60,8 +60,8 @@ export class BotRunIndicators implements Indicators {
 		return keltner(candleData);
 	}
 
-	topbot( candleData: ArrayCandle[] ){
-		this.indicatorsUsed[`topbot`] = true;
-		return topbot(candleData);
+	topbot( candleData: ArrayCandle[], options?: TopbotChartOptions ){
+		this.indicatorsUsed[`topbot|${options?.candleGrouping||1}`] = true;
+		return topbot(candleData, options);
 	}
 }
