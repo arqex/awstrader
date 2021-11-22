@@ -98,6 +98,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BotRunIndicators = void 0;
 var bollinger_1 = __webpack_require__(/*! ../indicators/bollinger */ "../lambdas/_common/indicators/bollinger.ts");
+var ema_1 = __webpack_require__(/*! ../indicators/ema */ "../lambdas/_common/indicators/ema.ts");
 var keltner_1 = __webpack_require__(/*! ../indicators/keltner */ "../lambdas/_common/indicators/keltner.ts");
 var sma_1 = __webpack_require__(/*! ../indicators/sma */ "../lambdas/_common/indicators/sma.ts");
 var topbot_1 = __webpack_require__(/*! ../indicators/topbot */ "../lambdas/_common/indicators/topbot.ts");
@@ -120,6 +121,10 @@ var BotRunIndicators = /** @class */ (function () {
     BotRunIndicators.prototype.rsi = function (candleData, period) {
         this.indicatorsUsed["rsi|" + period] = true;
         return this.rsi(candleData, period);
+    };
+    BotRunIndicators.prototype.ema = function (candleData, period) {
+        this.indicatorsUsed["ema|" + period] = true;
+        return ema_1.ema(candleData, period);
     };
     BotRunIndicators.prototype.smaArray = function (candleData, period) {
         // This indicator can't be displayed in the charts, don't store in the used ones
@@ -672,12 +677,14 @@ function topbot(data, options) {
         var current = candles[i];
         var prev = candles[i - 1];
         var pprev = candles[i - 2];
-        if (prev[3] > current[3] && prev[3] > pprev[3]) {
+        // the prev candle need to be greater than pprev and current, or greater than pprev and equals than current but current is bearish
+        if ((prev[3] > current[3] || (prev[3] === current[3] && current[2] < current[1])) && prev[3] > pprev[3]) {
             var value = Math.max(pprev[3], getTop(prev));
             tops.push(value);
             bottoms.push(0);
         }
-        else if (prev[4] < current[4] && prev[4] < pprev[4]) {
+        // the prev candle need to be smaller than pprev and current, or smaller than pprev and equals than current but current is bullish
+        else if ((prev[4] < current[4] || (prev[4] === prev[3] && current[1] < current[2])) && prev[4] < pprev[4]) {
             var value = Math.min(pprev[4], getBottom(prev));
             bottoms.push(value);
             tops.push(0);
@@ -687,10 +694,12 @@ function topbot(data, options) {
             bottoms.push(0);
         }
     }
-    removeDoubles(tops, bottoms);
     if (candleGrouping > 1) {
         return locateGroupedTopbots(data, tops, bottoms, candleGrouping);
     }
+    filterTops(tops);
+    filterBottoms(bottoms);
+    removeDoubles(tops, bottoms);
     // console.log( 'Before cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
     // removeNoise( tops, bottoms, getNoiseThreshold(tops, bottoms) );
     // console.log( 'After cleaning noise', tops.map( (t,i) => [t, bottoms[i]]) );
@@ -905,6 +914,50 @@ function locateGroupedTopbots(data, tops, bottoms, groupSize) {
         tops: ungroupedTops,
         bottoms: ungroupedBottoms
     };
+}
+function filterTops(tops) {
+    var prevValue = -Infinity;
+    var prevIndex;
+    tops.forEach(function (top, i) {
+        if (top) {
+            if (prevIndex === undefined) {
+                prevIndex = i;
+                prevValue = top;
+            }
+            else {
+                if (top > prevValue) {
+                    tops[prevIndex] = 0;
+                }
+                else {
+                    tops[i] = 0;
+                }
+                prevIndex = i;
+                prevValue = top;
+            }
+        }
+    });
+}
+function filterBottoms(bottoms) {
+    var prevValue = Infinity;
+    var prevIndex;
+    bottoms.forEach(function (bottom, i) {
+        if (bottom) {
+            if (prevIndex === undefined) {
+                prevIndex = i;
+                prevValue = bottom;
+            }
+            else {
+                if (bottom < prevValue) {
+                    bottoms[prevIndex] = 0;
+                }
+                else {
+                    bottoms[i] = 0;
+                }
+                prevIndex = i;
+                prevValue = bottom;
+            }
+        }
+    });
 }
 
 

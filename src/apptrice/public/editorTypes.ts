@@ -90,6 +90,8 @@ interface Indicators {
 	vma( candleData: ArrayCandle[], period: number ): number[]
 	/** Calculates the Relative Strength Index for an array of candle data. */
 	rsi( candleData: ArrayCandle, period: number): number[]
+	/** Calculates the Exponential moving average for an array of candle data. */
+	ema( candleData: ArrayCandle[], period: number): number[]
 
 	bollinger( candleData: ArrayCandle[] )
 	keltner( candleData: ArrayCandle[] )

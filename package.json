@@ -24,6 +24,5 @@
   "homepage": "https://github.com/arqex/awstrader#readme",
   "devDependencies": {
     "string-replace-loader": "^3.0.1"
-  },
-  "dependencies": {}
+  }
 }

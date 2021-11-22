@@ -18,6 +18,7 @@ import { PointSeries } from './components/PointSeries';
 import { Line } from './components/Line';
 import { ArrayCandle } from '../../../../lambdas/lambda.types';
 import { CandlestickSeries } from './components/CandlestickSeries';
+import { getChartIndicators } from './indicators/ChartIndicatorFactory';
 
 interface DataByCharts {
 	[chart: string]: ChartPlotterData
@@ -96,10 +97,6 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 	renderCandlesChart( plotterData: ChartPlotterData ){
 		const {orders} = this.props;
 		const candles = this.getChartData();
-		const indicators = chartUtils
-			.getRunnableIndicators( plotterData?.indicators )
-			.filter( i => i.tooltip === 'ma' )
-		;
 
 		return (
 			<Chart id={1} yExtents={(d: ChartDataItem) => [d[3], d[4]]}>
@@ -113,14 +110,12 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 					{...this.getCandleStyles('#d05773', '#29946d') } />
 				{ this.renderMouseCoordinates() }
 				{ this.renderCandleIndicators(plotterData?.indicators) }
-				{ this.renderIndicatorLineSeries( indicators )}
 				<OrderSeries orders={orders} candles={candles} />
 				{ this.renderPoints(plotterData.points) }
 				{ this.renderLines(plotterData.series) }
 				<OHLC
 					origin={[-30,0]}
 					textFill="#ffffff" />
-				{ this.renderIndicatorTooltips(indicators) }
 			</Chart>
 		)
 	}
@@ -140,24 +135,6 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 				<BarSeries
 					yAccessor={chartUtils.getYAccessor('volume')}
 					fillStyle={ this.getCandleStyles('#78a4b9', '#bd66a9').fill } />
-			</Chart>
-		)
-	}
-	
-	renderRSIChart( plotterData: ChartPlotterData, i: number ) {
-		const indicators = chartUtils.getRunnableIndicators( this.props.plotterData?.indicators ).filter( i => i.type === 'rsi' );
-
-		return (
-			<Chart id="rsi"
-				yExtents={() => [0,100]}>
-				{ indicators.map( i => (
-					<>
-						<RSISeries yAccessor={chartUtils.getYAccessor(i.key)} />
-						<RSITooltip origin={[-38, 15]}
-							yAccessor={chartUtils.getYAccessor(i.key)}
-							options={{windowSize: i.args[0]}} />
-					</>
-				))}
 			</Chart>
 		)
 	}
@@ -212,7 +189,7 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 			</>
 		)
 	}
-
+	/*
 	renderIndicatorTooltips( indicators: RunnableIndicator[] ) {
 		if( !indicators.length ) return;
 
@@ -240,23 +217,14 @@ export default class TradingChart extends React.Component<TradingChartProps> {
 			)
 		}
 	}
+	*/
 
 	renderCandleIndicators(sources: string[]){
 		let renderedIndicators: any[] = [];
-		chartUtils.getDrawableIndicators(this.id, sources).forEach( (ind,i) => {
+		getChartIndicators(this.id, sources).forEach( (ind,i) => {
 			renderedIndicators.push( `ind${i}`, ind.render(`ind${i}`, {}) )
 		});
 		return (<>{renderedIndicators}</>);
-	}
-
-	renderIndicatorLineSeries(indicators: RunnableIndicator[]) {
-		if( !indicators.length ) return;
-
-		return indicators.map( (indicator:any, i: number) => (
-			<LineSeries key={indicator.key}
-				yAccessor={indicator.func.accessor()}
-				strokeStyle={indicator.color} />
-		));
 	}
 
 	getCandleStyles( up:string, down:string) {
@@ -325,7 +293,7 @@ const augmentData = memoizeOne( (chartId: string, candles: ArrayCandle[], indica
 		return augmented;
 	}
 	
-	chartUtils.getDrawableIndicators(chartId, indicators).forEach( (ind) => {
+	getChartIndicators(chartId, indicators).forEach( (ind) => {
 		augmented = ind.augmentData(augmented);
 	})
 

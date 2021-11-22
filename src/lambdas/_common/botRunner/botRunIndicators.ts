@@ -1,5 +1,6 @@
 import { ArrayCandle } from "../../lambda.types";
 import { bollinger } from "../indicators/bollinger";
+import { ema } from "../indicators/ema";
 import { keltner } from "../indicators/keltner";
 import { sma, smaArray } from "../indicators/sma";
 import { topbot, TopbotChartOptions } from "../indicators/topbot";
@@ -14,7 +15,9 @@ export interface Indicators {
 	/** Calculates the Standard Moving Average for candle volumes. */
 	vma( candleData: ArrayCandle[], period: number ): number[]
 	/** Calculates the Relative Strength Index for an array of candle data. */
-	rsi( candleData: ArrayCandle, period: number): number[]
+	rsi( candleData: ArrayCandle[], period: number): number[]
+	/** Calculates the Exponential moving average for an array of candle data. */
+	ema( candleData: ArrayCandle[], period: number): number[]
 
 	bollinger( candleData: ArrayCandle[] )
 	keltner( candleData: ArrayCandle[] )
@@ -42,9 +45,14 @@ export class BotRunIndicators implements Indicators {
 		return sma(candleData, period, 'volume');
 	}
 
-	rsi( candleData: ArrayCandle, period: number){
+	rsi( candleData: ArrayCandle[], period: number){
 		this.indicatorsUsed[`rsi|${period}`] = true;
 		return this.rsi(candleData, period);
+	}
+
+	ema( candleData: ArrayCandle[], period: number){
+		this.indicatorsUsed[`ema|${period}`] = true;
+		return ema(candleData, period);
 	}
 
 	smaArray( candleData: number[], period: number) {

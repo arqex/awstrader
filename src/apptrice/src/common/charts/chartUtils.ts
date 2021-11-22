@@ -76,71 +76,6 @@ const chartUtils = {
 		return cachedAccessors[key];
 	},
 
-	getDrawableIndicators: (chartId: string, sources: string[] | undefined ) => {
-		let indicators: ChartIndicator[] = [];
-		if( !sources ) return indicators;
-
-		// ChartId is only used to memoize indicators for the same chart
-		return memoGetDrawableIndicators( chartId, JSON.stringify(sources) );
-	},
-
-	getRunnableIndicators: memoizeOne( (sources: string[] | undefined ) => {
-		let indicators: RunnableIndicator[] = [];
-		if( !sources ) return indicators;
-
-		let i = 0;
-
-		sources.forEach( (source:string) => {
-			let [name, ...args] = source.split('|');
-			if( ['sma', 'ema', 'wma', 'tma'].includes(name) ){
-				indicators.push({
-					key: source,
-					type: name,
-					args: args,
-					tooltip: 'ma',
-					color: colors[i++],
-					func: indicatorFunctions[name]()
-						.options({ windowSize: parseInt(args[0])})
-						.merge( getMerger(source) )
-						.accessor((data:any) => {
-							return data.calculated[source];
-						})
-				});
-			}
-			else if(name === 'vma') {
-				indicators.push({
-					key: source,
-					type: name,
-					args,
-					tooltip: 'ma',
-					color: colors[i++],
-					func: indicatorFunctions.ema()
-						.options({windowSize: parseInt(args[0]), sourcePath: 'volume'})
-						.merge( getMerger(source)  )
-						.accessor((data:any) => data.calculated[source])
-				})
-			}
-			else if(name === 'rsi' ){
-				indicators.push({
-					key: source,
-					type: name,
-					args,
-					tooltip: 'rsi',
-					color: colors[i++],
-					func: indicatorFunctions.rsi()
-						.options({windowSize: parseInt(args[0])})
-						.merge( getMerger(source)  )
-						.accessor((data:any) => data.calculated[source])
-				})
-			}
-			else {
-				console.warn(`Unknown indicator ${name}`)
-			}
-		});
-
-		return indicators;
-	}),
-
 	candleAccessor(item: ChartDataItem){
 		return {
 			open: item[1],
@@ -231,8 +166,6 @@ const chartUtils = {
 	}
 }
 
-
-
 // Check if calculated is defined before setting the key
 function getMerger( key: string ) {
 	return function( data: ChartDataItem, value: number ){
@@ -240,23 +173,5 @@ function getMerger( key: string ) {
 	}
 }
 
-
-const memoGetDrawableIndicators = memoizeOne( (chartId: string, sourcesStr: string) => {
-	let indicators: ChartIndicator[] = [];
-	let sources: string[] = JSON.parse(sourcesStr);
-
-	sources.forEach( s => {
-		let [type, ...args] = s.split('|');
-
-		if( type === 'topbot' ){
-			indicators.push( new TopbotChartIndicator( args ) );
-		}
-		else {
-			console.error('Unknown indicator type', type);
-		}
-	});
-
-	return indicators;
-})
 
 export default chartUtils;
