@@ -88,8 +88,8 @@ async function setTestData( event ) {
       provider: 'bitfinex',
       type: 'real',
       credentials: {
-        key: 'Mma7B6ISTUNVcnUPOrDJgVgcNRh3VbmeIalaBDvUpml',
-        secret: 'ckm9hrkka000dyq349ngb2jro'
+        key: 'deactivated_key',
+        secret: 'deactivated_secret'
       }
     });
 
