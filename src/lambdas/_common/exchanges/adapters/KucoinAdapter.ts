@@ -178,9 +178,20 @@ function delayedOrderCreation( baseParams, orderParams, i ){
 	return new Promise( (resolve) => {
 		let timeout = i * 100;
 		setTimeout( () => {
-			resolve( KucoinClient.rest.Trade.Orders.postOrder(baseParams, orderParams) );
+			resolve( placeOrder( baseParams, orderParams) );
 		}, timeout);
 	})
+}
+
+function placeOrder( baseParams, orderParams ){
+	if( baseParams.type === 'stop' ){
+		let stopParams = {
+			...baseParams,
+			type: 'market'
+		}
+		return KucoinClient.arguments.Trade.StopOrder.postStopOrder(stopParams, baseParams);
+	}
+	return KucoinClient.rest.Trade.Orders.postOrder(baseParams, orderParams);
 }
 
 interface KucoinResponse {
@@ -247,7 +258,7 @@ interface KucoinOrderParams {
 		clientOid: string
 		side: 'buy' | 'sell'
 		symbol: string
-		type?: 'limit' | 'market'
+		type?: 'limit' | 'market' | 'stop'
 	},
 	orderParams: {
 		price?: string

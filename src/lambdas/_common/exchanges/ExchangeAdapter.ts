@@ -11,7 +11,7 @@ export interface CandleQuery {
 export interface ExchangeOrder {
 	id: string
 	pair: string
-	type: 'limit' | 'market'
+	type: 'limit' | 'market' | 'stop'
 	status: 'pending' | 'placed' | 'completed' | 'cancelled' | 'error'
 	errorReason: string | null
 	direction: 'buy' | 'sell'

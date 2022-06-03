@@ -203,6 +203,9 @@ function getBfxOrderType( type: string ) {
 	if( type === 'limit' ){
 		return 'EXCHANGE LIMIT';
 	}
+	else if( type === 'stop' ){
+		return 'EXCHANGE STOP'
+	}
 	return 'EXCHANGE MARKET';
 }
 

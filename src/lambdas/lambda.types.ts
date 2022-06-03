@@ -84,7 +84,7 @@ export interface Portfolio {
 export interface OrderInput {
 	id: string
 	pair: string
-	type: 'limit' | 'market'
+	type: 'limit' | 'market' | 'stop'
 	direction: 'buy' | 'sell'
 	amount: number
 	price?: number
